@@ -1,0 +1,51 @@
+# === Node / Express Backend ===
+node_modules/
+.env
+.env.local
+.env.*.local
+dist/
+build/
+coverage/
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Optional OS or IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# === React / Vite Frontend ===
+# dependencies
+/Client/node_modules/
+
+# build outputs
+/Client/dist/
+Client/.vite/
+
+# local env files
+Client/.env
+Client/.env.local
+Client/.env.*.local
+
+# misc
+Client/.DS_Store
+Client/.cache
+Client/npm-debug.log*
+
+# === Common ===
+*.bak
+*.tmp
+*.swp
+*.log
+
+# === Optional: Test folders or coverage ===
+__tests__/
+jest.config.js
+coverage/
