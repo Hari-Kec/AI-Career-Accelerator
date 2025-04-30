@@ -1,16 +1,48 @@
 import React from 'react';
 import { FiHome, FiUser, FiMessageSquare, FiBarChart2, FiSettings } from 'react-icons/fi';
 import { FaRegLightbulb, FaUserEdit, FaBriefcase } from 'react-icons/fa';
+import logo from '../../assets/logo.png';
+import axios from 'axios';
 
-const Dashboard = ({ name = "Jessica Grande" }) => {
+const Dashboard = ({ name = "Hari" }) => {
+  const handleResumeOptimizationClick = async () => {
+    try {
+      // Call your backend endpoint to trigger Streamlit
+      await axios.get('http://localhost:5000/run-resume-optimizer');
+      
+      // Open the Streamlit app in a new tab (assuming it runs on port 8501)
+      window.open('http://localhost:8501', '_blank');
+      
+    } catch (error) {
+      console.error('Error triggering resume optimizer:', error);
+      alert('Failed to start resume optimizer. Please ensure the backend service is running.');
+    }
+  };
+
+  const handleCardClick = (title) => {
+    switch(title) {
+      case 'Resume Optimization':
+        handleResumeOptimizationClick();
+        break;
+      case 'Profile Enhancement':
+        // Add your profile enhancement logic here
+        alert('Profile Enhancement feature coming soon!');
+        break;
+      case 'Apply Jobs':
+        // Add your apply jobs logic here
+        alert('Job Application feature coming soon!');
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="flex h-screen bg-[#f8f9fa]">
       {/* Sidebar - Blue shade from image */}
       <div className="w-64 bg-[#080a76] text-white">
         <div className="p-6 border-b border-[#2a4a7a]">
-          
-          <p className="text-lg text-[#a4b8d8]">Web logo</p>
-          <h1 className="text-2xl font-bold">Shaw</h1>
+          <img src={logo} alt="Logo" className="h-30 w-75" />
         </div>
         
         <nav className="mt-4">
@@ -41,7 +73,6 @@ const Dashboard = ({ name = "Jessica Grande" }) => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#1a3e72]">Hi, Welcome back {name}</h1>
-          <p className="text-[#6c757d]">Monday, January 31, 2022</p>
         </div>
 
         {/* Action Cards - Matching image colors */}
@@ -71,7 +102,11 @@ const Dashboard = ({ name = "Jessica Grande" }) => {
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.title} className={`p-6 rounded-lg border ${item.border} ${item.bg} hover:shadow-md transition-shadow cursor-pointer`}>
+              <div 
+                key={item.title} 
+                className={`p-6 rounded-lg border ${item.border} ${item.bg} hover:shadow-md transition-shadow cursor-pointer`}
+                onClick={() => handleCardClick(item.title)}
+              >
                 <div className="flex items-center">
                   <Icon className={`text-2xl mr-4 ${item.text}`} />
                   <h3 className={`text-lg font-semibold ${item.text}`}>{item.title}</h3>
@@ -82,73 +117,11 @@ const Dashboard = ({ name = "Jessica Grande" }) => {
           })}
         </div>
 
-        {/* Stats Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8 border border-[#e0e0e0]">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-[#1a3e72]">Hours Spent</h2>
-            <span className="text-sm text-[#6c757d]">Last 7 days</span>
-          </div>
-          <div className="flex justify-between text-center">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-              <div key={day} className="flex flex-col items-center">
-                <div className="h-24 w-8 bg-[#e3f2fd] rounded-t-md mb-2"></div>
-                <span className="text-xs text-[#6c757d]">{day}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 text-center">
-            <p className="text-[#6c757d]">Total: <span className="font-semibold text-[#1a3e72]">20.15m</span></p>
-          </div>
-        </div>
-
-        {/* Courses Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-[#e0e0e0]">
-            <h2 className="text-xl font-semibold mb-4 text-[#1a3e72]">Your Courses</h2>
-            {[
-              { title: "Copywriting for User Experience Design", instructor: "Mohamed Lewis", duration: "20.21m", code: "A.1669" },
-              { title: "The 5 Steps to Presenting Like a Pro", instructor: "Fernandez Diaz", duration: "30.25m", code: "A.857" },
-              { title: "Conducting UX Research: Steps to...", instructor: "Susanne Potzky" }
-            ].map((course) => (
-              <div key={course.title} className="mb-4 pb-4 border-b border-[#f5f5f5] last:border-0">
-                <h3 className="font-medium text-[#333]">{course.title}</h3>
-                <p className="text-sm text-[#6c757d]">{course.instructor}</p>
-                {course.duration && (
-                  <div className="flex text-xs text-[#9e9e9e] mt-1">
-                    <span>{course.duration}</span>
-                    <span className="mx-2">•</span>
-                    <span>{course.code}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-            <button className="text-[#1976d2] text-sm font-medium mt-2">Show All</button>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-[#e0e0e0]">
-            <h2 className="text-xl font-semibold mb-4 text-[#1a3e72]">Assignments</h2>
-            <div className="mb-6">
-              <div className="flex justify-between text-sm mb-2 text-[#6c757d]">
-                <span>To Start</span>
-                <span>In Progress</span>
-                <span>Finished</span>
-              </div>
-              <div className="h-2 bg-[#e0e0e0] rounded-full overflow-hidden">
-                <div className="h-full bg-[#1976d2]" style={{ width: '30%' }}></div>
-                <div className="h-full bg-[#ffc107]" style={{ width: '50%' }}></div>
-                <div className="h-full bg-[#4caf50]" style={{ width: '20%' }}></div>
-              </div>
-            </div>
-            {[
-              { title: "Simple Copywriting", due: "Due in 3 days" },
-              { title: "Presentation Task", due: "Due in 3 days" }
-            ].map((task) => (
-              <div key={task.title} className="mb-3">
-                <h3 className="font-medium text-[#333]">{task.title}</h3>
-                <p className="text-sm text-[#6c757d]">{task.due}</p>
-              </div>
-            ))}
-            <button className="text-[#1976d2] text-sm font-medium mt-2">See All Assignments</button>
+        {/* Additional Dashboard Content */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-[#1a3e72] mb-4">Your Recent Activity</h2>
+          <div className="text-gray-600">
+            <p>No recent activity to show. Start by optimizing your resume or updating your profile!</p>
           </div>
         </div>
       </div>
