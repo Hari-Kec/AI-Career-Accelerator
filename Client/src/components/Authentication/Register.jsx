@@ -1,17 +1,25 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import registerImage from "../../assets/register-image.png";
-
+import { useNavigate } from "react-router-dom";
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const { register } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    register(email, password, name, phone);
+    try{
+      await register(email, password, name, phone);
+      navigate('/dashboard');
+    }
+    catch(error){
+      console.error("Registration failed:", error);
+    }
+    
   };
 
   return (

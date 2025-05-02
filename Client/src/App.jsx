@@ -11,6 +11,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 //PROFILE ENHANCE
 import ProfileDashboard from './components/ProfileEnhance/Dashboard'
 import GitHubReport from './components/ProfileEnhance/GithubReport';
+import LinkedInReport from './components/ProfileEnhance/LinkedinReport';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
 
           <Route path="/profile-enhance" element={<ProfileDashboard />} />
           <Route path="/github-report/:username" element={<GitHubReport />} />
+          <Route path="/linkedin-report" element={<LinkedInReport />} />
 
         </Routes>
       </Router>

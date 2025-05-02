@@ -1,0 +1,99 @@
+# .gitignore for AI-Career-Accelerator Automation Project
+
+# Configuration files with secrets
+config/config.yaml
+config/keywords.yaml
+*.env
+.env.local
+.env.*.local
+
+# Sensitive data
+*.pdf
+*.docx
+*.doc
+credentials.json
+secrets/
+*.key
+*.pem
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environment
+jobenv/
+venv/
+ENV/
+env/
+.benv/
+.venv/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+*.dump
+*.bak
+
+# Selenium/WebDriver
+webdriver/
+geckodriver.log
+chromedriver.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Testing
+coverage/
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Visual Studio Code
+.history
+*.code-workspace
+
+# System files
+*.bak
+*.tmp
+*.temp
+*.pid
+*.seed
+*.pid.lock
+*.pytest_cache

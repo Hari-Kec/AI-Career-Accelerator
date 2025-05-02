@@ -1,15 +1,21 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import loginImage from "../../assets/login-image.png"; 
-
+import {useNavigate} from "react-router-dom";
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login(email, password);
+    try {
+      await login(email, password); // Assuming login is an async function
+      navigate('/dashboard'); // Navigate to /dashboard on successful login
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return (
@@ -85,7 +91,7 @@ const Login = () => {
                   type="submit"
                   className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-md transition-all duration-300 ease-in-out"
                 >
-                  Sign in
+                  Log in
                 </button>
               </div>
             </form>
