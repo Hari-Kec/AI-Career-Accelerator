@@ -1,20 +1,36 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import loginImage from "../../assets/login-image.png"; 
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { FaGoogle } from "react-icons/fa"; // Import Google icon
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { login, signInWithGoogle } = useAuth(); // Add signInWithGoogle from context
   const navigate = useNavigate();
+  const [error, setError] = useState(''); // Add error state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Clear previous errors
     try {
-      await login(email, password); // Assuming login is an async function
-      navigate('/dashboard'); // Navigate to /dashboard on successful login
+      await login(email, password);
+      navigate('/dashboard');
     } catch (error) {
+      setError("Login failed. Please check your credentials.");
       console.error("Login failed:", error);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError(''); // Clear previous errors
+    try {
+      await signInWithGoogle();
+      navigate('/dashboard');
+    } catch (error) {
+      setError("Google sign-in failed. Please try again.");
+      console.error("Google sign-in failed:", error);
     }
   };
 
@@ -40,6 +56,13 @@ const Login = () => {
             <p className="text-gray-600 text-center mb-8">
               Sign in to continue your OffCampus Assist journey
             </p>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -84,6 +107,9 @@ const Login = () => {
                   />
                   Remember me
                 </label>
+                <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                  Forgot password?
+                </a>
               </div>
 
               <div>
@@ -96,9 +122,32 @@ const Login = () => {
               </div>
             </form>
 
+            {/* Google Sign-In Button */}
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white/30 text-gray-500">Or continue with</span>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  onClick={handleGoogleSignIn}
+                  type="button"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+                >
+                  <FaGoogle className="text-red-500" />
+                  Log in with Google
+                </button>
+              </div>
+            </div>
+
             <p className="text-center text-sm text-gray-600 mt-6">
               Don't have an account?{" "}
-              <a href="register" className="text-blue-600 font-medium hover:underline">
+              <a href="/register" className="text-blue-600 font-medium hover:underline">
                 Sign up
               </a>
             </p>

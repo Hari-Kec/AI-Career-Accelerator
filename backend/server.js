@@ -27,22 +27,67 @@ app.use(cors({
 app.use(express.json());
 app.use('/api/groq', groqRouter);
 
-
-
-
-
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.log(err));
 
 // User Model
+// Update your User model
 const User = mongoose.model('User', new mongoose.Schema({
   name: { type: String, required: true },
-  phone: { type: String, required: true },
+  phone: { type: String },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String },
+  firebaseUid: { type: String, unique: true, sparse: true }, // For Firebase users
+  authProvider: { type: String, enum: ['email', 'google'], default: 'email' },
+  avatar: { type: String }
 }));
+// Google Auth Route
+app.post('/api/auth/google', async (req, res) => {
+  const { uid, email, name, photoURL } = req.body;
+
+  try {
+    // Check if user exists by Firebase UID or email
+    let user = await User.findOne({ 
+      $or: [{ firebaseUid: uid }, { email }] 
+    });
+
+    if (!user) {
+      // Create new user for Google auth
+      user = new User({
+        name,
+        email,
+        firebaseUid: uid,
+        authProvider: 'google',
+        avatar: photoURL
+      });
+      await user.save();
+    } else if (!user.firebaseUid) {
+      // Link existing account with Firebase
+      user.firebaseUid = uid;
+      user.authProvider = 'google';
+      if (!user.avatar) user.avatar = photoURL;
+      await user.save();
+    }
+
+    // Generate JWT token (same as your regular auth)
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+    
+    res.send({ 
+      user: { 
+        name: user.name, 
+        email: user.email, 
+        phone: user.phone,
+        avatar: user.avatar
+      }, 
+      token 
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(400).send(error.message);
+  }
+});
 
 // Register Route
 app.post('/api/auth/register', async (req, res) => {
@@ -52,12 +97,25 @@ app.post('/api/auth/register', async (req, res) => {
   if (user) return res.status(400).send('User already exists');
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ name, phone, email, password: hashedPassword});
+  const newUser = new User({ 
+    name, 
+    phone: phone || '', // Make phone optional
+    email, 
+    password: hashedPassword,
+    authProvider: 'email'
+  });
 
   await newUser.save();
 
   const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET);
-  res.send({ user: {  name: newUser.name, email: newUser.email, phone: newUser.phone }, token });
+  res.send({ 
+    user: {  
+      name: newUser.name, 
+      email: newUser.email, 
+      phone: newUser.phone 
+    }, 
+    token 
+  });
 });
 
 // Login Route
@@ -95,7 +153,16 @@ const authMiddleware = (req, res, next) => {
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
   const user = await User.findById(req.userId);
   if (!user) return res.status(404).send('User not found');
-  res.send({ user: { name: user.name, email: user.email, phone: user.phone } });
+  
+  res.send({ 
+    user: { 
+      name: user.name, 
+      email: user.email, 
+      phone: user.phone,
+      avatar: user.avatar,
+      authProvider: user.authProvider
+    } 
+  });
 });
 
 // Configure multer for file upload
