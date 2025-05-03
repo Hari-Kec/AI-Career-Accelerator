@@ -1,71 +1,11 @@
-# AI-Career-Accelerator
-An integrated solution that empowers students to optimize their professional profiles, discover targeted job opportunities, and track applications through AI-driven automation.
-
-cd Client
-npm install vite@latest
-npm install react-icons react-hot-toast react-hook-form @hookform/resolvers zod
-npm install react-router-dom
-npm install axios
-
-cd backend
-npm init -y
-npm install express nodemailer cors body-parser crypto
-
-
-
-
-
-
-
-# >>>>>>>>>>> Easy Apply Questions & Inputs <<<<<<<<<<<
-
-# Your legal name
-username = "demos9317@gmail.com"       # Enter your username in the quotes
-password = "shari@2024"  
-first_name = "Hari"                 # Your first name in quotes Eg: "First", "Sai"
-middle_name = "Senthil"            # Your name in quotes Eg: "Middle", "Vignesh", ""
-last_name = "Kumar"                # Your last name in quotes Eg: "Last", "Golla"
-
-# Phone number (required), make sure it's valid.
-phone_number = "6383903339"        # Enter your 10 digit number in quotes Eg: "9876543210"
-
-# What is your current city?
-current_city = "Erode"                  # Los Angeles, San Francisco, etc.
-'''
-Note: If left empty as "", the bot will fill in location of jobs location.
-'''
-
-# Address, not so common question but some job applications make it required!
-street = "404,Mullai Nagar, Mullamparappu, Erode"
-state = "Tamil Nadu"
-zipcode = "638115"
-country = "India"
-
-## US Equal Opportunity questions
-# What is your ethnicity or race? If left empty as "", tool will not answer the question. However, note that some companies make it compulsory to be answered
-ethnicity = "Asian"              # "Decline", "Hispanic/Latino", "American Indian or Alaska Native", "Asian", "Black or African American", "Native Hawaiian or Other Pacific Islander", "White", "Other"
-
-# How do you identify yourself? If left empty as "", tool will not answer the question. However, note that some companies make compulsory to be answered
-gender = "Male"                 # "Male", "Female", "Other", "Decline" or ""
-
-# Are you physically disabled or have a history/record of having a disability? If left empty as "", tool will not answer the question. However, note that some companies make it compulsory to be answered
-disability_status = "No"      # "Yes", "No", "Decline"
-
-veteran_status = "No"         # "Yes", "No", "Decline"
-
-
-
-
-
-
-
-//jobApply.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FiUser, FiMail, FiPhone, FiMapPin, FiHome, 
-  FiUpload, FiLock, FiGlobe, FiFlag, FiAward 
+  FiUpload, FiLock, FiGlobe, FiFlag, FiAward, FiX 
 } from 'react-icons/fi';
 import { FaLinkedin } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
 
 const JobApply = () => {
   const [formData, setFormData] = useState({
@@ -87,11 +27,46 @@ const JobApply = () => {
     resume: null
   });
   const [uploadedFileName, setUploadedFileName] = useState(null);
+  const navigate = useNavigate();
+
+  // Clear data on component mount (page refresh/load)
+  useEffect(() => {
+    const clearData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/clear-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.log('Non-JSON response:', text);
+          return;
+        }
+        
+        const result = await response.json();
+        if (!response.ok) {
+          console.error('Failed to clear data:', result.message);
+        }
+      } catch (error) {
+        console.error('Error clearing data:', error);
+      } 
+    };
+    clearData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     
     if (name === 'resume' && files && files[0]) {
+      // Check file size (5MB limit)
+      if (files[0].size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit');
+        return;
+      }
+      
       setUploadedFileName(files[0].name);
       setFormData(prev => ({
         ...prev,
@@ -105,7 +80,29 @@ const JobApply = () => {
     }
   };
 
+  const handleRemoveFile = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/remove-resume', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const result = await response.json();
+      if (response.ok) {
+        setUploadedFileName(null);
+        setFormData(prev => ({ ...prev, resume: null }));
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      alert(`Error removing file: ${error.message}`);
+    }
+  };
+
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     
     try {
@@ -125,15 +122,15 @@ const JobApply = () => {
   
       const response = await fetch('http://localhost:5000/api/update-personal-py', {
         method: 'POST',
-        body: formDataToSend, // No Content-Type header for FormData!
+        body: formDataToSend,
       });
   
       const result = await response.json();
-      if (result.success) {
-        alert(`Files updated successfully!\npersonal.py: ${result.pythonPath}\nResume: ${result.resumePath}`);
-      } else {
+      if (!response.ok) {
         throw new Error(result.message);
       }
+
+      alert(`Application submitted successfully!\n${result.message}`);
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -148,6 +145,7 @@ const JobApply = () => {
           </h2>
           <p className="text-indigo-100 mt-1">Complete your profile to apply for jobs</p>
         </div>
+         
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -402,17 +400,37 @@ const JobApply = () => {
           {/* Resume Upload */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center">
-              <FiUpload className="mr-2 text-indigo-500" /> Resume Upload
+              <FiUpload className="mr-2 text-indigo-500" /> Resume Upload *
             </h3>
             
             <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <FiUpload className="w-8 h-8 mb-3 text-gray-400" />
-                  <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500">PDF, DOC, DOCX (Max. 5MB)</p>
+              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer ${
+                uploadedFileName 
+                  ? 'border-green-500 bg-green-50' 
+                  : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+              }`}>
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4">
+                  <FiUpload className={`w-8 h-8 mb-3 ${
+                    uploadedFileName ? 'text-green-500' : 'text-gray-400'
+                  }`} />
+                  
+                  {uploadedFileName ? (
+                    <>
+                      <p className="mb-1 text-sm font-medium text-gray-700 text-center truncate max-w-full">
+                        {uploadedFileName}
+                      </p>
+                      <p className="text-xs text-green-600">
+                        Ready to submit
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="mb-2 text-sm text-gray-500 text-center">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">PDF, DOC, DOCX (Max. 5MB)</p>
+                    </>
+                  )}
                 </div>
                 <input 
                   type="file" 
@@ -424,27 +442,42 @@ const JobApply = () => {
                 />
               </label>
             </div>
+            
             {uploadedFileName && (
-    <button
-      type="button"
-      onClick={() => {
-        setUploadedFileName(null);
-        setFormData(prev => ({ ...prev, resume: null }));
-      }}
-      className="text-sm text-red-600 hover:text-red-800 flex items-center"
-    >
-      <FiUpload className="mr-1" /> Remove file
-    </button>
-  )}
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">
+                  {formData.resume ? `${Math.round(formData.resume.size / 1024)} KB` : ''}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  className="text-xs text-red-600 hover:text-red-800 flex items-center"
+                  
+                >
+                  <FiX className="mr-1" /> Remove file
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md transition duration-200 flex items-center justify-center"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md transition duration-200 flex items-center justify-center disabled:opacity-50"
             >
               <FiAward className="mr-2" /> Submit Application
+            </button>
+          </div>
+           {/* apply for AI Button */}
+           <div className="pt-4">
+            <button
+              type="button"
+              onClick={() => navigate('/parsing')}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md transition duration-200 flex items-center justify-center disabled:opacity-50"
+            >
+                
+              <FiAward className="mr-2" /> Apply for Job
             </button>
           </div>
         </form>
@@ -454,212 +487,3 @@ const JobApply = () => {
 };
 
 export default JobApply;
-//server.js
-import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import mongoose from 'mongoose';
-import express from 'express';
-import cors from 'cors';
-import groqRouter from './routes/groq.js';
-import fs from 'fs';
-import path from 'path';
-import multer from 'multer';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-
-dotenv.config();
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use('/api/groq', groqRouter);
-
-
-
-
-
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.log(err));
-
-// User Model
-const User = mongoose.model('User', new mongoose.Schema({
-  name: { type: String, required: true },
-  phone: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
-}));
-
-// Register Route
-app.post('/api/auth/register', async (req, res) => {
-  const { name, phone, email, password } = req.body;
-
-  const user = await User.findOne({ email });
-  if (user) return res.status(400).send('User already exists');
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ name, phone, email, password: hashedPassword});
-
-  await newUser.save();
-
-  const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET);
-  res.send({ user: {  name: newUser.name, email: newUser.email, phone: newUser.phone }, token });
-});
-
-// Login Route
-app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).send('User not found');
-
-  const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) return res.status(400).send('Invalid password');
-
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-  res.send({ user: { email: user.email }, token });
-});
-
-// Middleware to protect routes
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.header('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).send('Access denied');
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
-    next();
-  } catch (err) {
-    res.status(400).send('Invalid token');
-  }
-};
-
-// Protected Route
-app.get('/api/auth/me', authMiddleware, async (req, res) => {
-  const user = await User.findById(req.userId);
-  if (!user) return res.status(404).send('User not found');
-  res.send({ user: { name: user.name, email: user.email, phone: user.phone } });
-});
-
-// Configure multer for file upload
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      const resumePath = path.join(__dirname, '../JobApplyBot/resume');
-      // Create directory if it doesn't exist
-      if (!fs.existsSync(resumePath)) {
-        fs.mkdirSync(resumePath, { recursive: true });
-      }
-      cb(null, resumePath);
-    },
-    filename: function (req, file, cb) {
-      // Use original filename or generate a new one
-      cb(null, file.originalname);
-    }
-  }),
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf' || 
-        file.mimetype === 'application/msword' || 
-        file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only PDF, DOC, and DOCX are allowed.'));
-    }
-  },
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
-
-// Middleware to handle multipart/form-data
-app.use(express.urlencoded({ extended: true }));
-
-app.post('/api/update-personal-py', upload.single('resume'), (req, res) => {
-  try {
-    const formData = req.body;
-    const resumeFile = req.file;
-    
-    // 1. Generate and save personal.py
-    const pythonContent = `# >>>>>>>>>>> Easy Apply Questions & Inputs <<<<<<<<<<<
-
-# Your legal name
-username = "${formData.linkedinEmail || ''}"
-password = "${formData.linkedinPassword || ''}"  
-first_name = "${formData.firstName || ''}"
-middle_name = "${formData.middleName || ''}"
-last_name = "${formData.lastName || ''}"
-
-# Phone number
-phone_number = "${formData.phone || ''}"
-
-# Location information
-current_city = "${formData.city || ''}"
-street = "${formData.street || ''}"
-state = "${formData.state || ''}"
-zipcode = "${formData.zipCode || ''}"
-country = "${formData.country || ''}"
-
-# Demographic information
-ethnicity = "${formData.ethnicity || ''}"
-gender = "${formData.gender || ''}"
-disability_status = "${formData.disability || ''}"
-veteran_status = "${formData.veteran || ''}"
-`;
-
-    const pythonPath = path.join(__dirname, '../JobApplyBot/config/personals.py');
-    const pythonDir = path.dirname(pythonPath);
-    
-    if (!fs.existsSync(pythonDir)) {
-      fs.mkdirSync(pythonDir, { recursive: true });
-    }
-    
-    fs.writeFileSync(pythonPath, pythonContent);
-    
-    // 2. Prepare response
-    const responseData = {
-      success: true,
-      message: 'Files updated successfully',
-      pythonPath: pythonPath,
-      resumePath: resumeFile ? path.join(resumeFile.destination, resumeFile.filename) : 'No resume uploaded'
-    };
-    
-    res.json(responseData);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Error processing your request'
-    });
-  }
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  if (err instanceof multer.MulterError) {
-    // A Multer error occurred when uploading
-    res.status(400).json({ 
-      success: false, 
-      message: err.message || 'File upload error' 
-    });
-  } else {
-    // Other errors
-    res.status(500).json({ 
-      success: false, 
-      message: err.message || 'Internal server error' 
-    });
-  }
-});
-
-// Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-

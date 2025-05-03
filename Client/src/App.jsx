@@ -13,6 +13,10 @@ import ProfileDashboard from './components/ProfileEnhance/Dashboard'
 import GitHubReport from './components/ProfileEnhance/GithubReport';
 import LinkedInReport from './components/ProfileEnhance/LinkedinReport';
 
+//APPLY JOBS
+import JobApply from './components/ApplyJob/JobApply';
+import Parsing from './components/ApplyJob/Parsing';
+
 function App() {
   return (
     <AuthProvider>
@@ -26,6 +30,10 @@ function App() {
           <Route path="/profile-enhance" element={<ProfileDashboard />} />
           <Route path="/github-report/:username" element={<GitHubReport />} />
           <Route path="/linkedin-report" element={<LinkedInReport />} />
+
+          <Route path="/apply-jobs" element={<JobApply />} />
+          <Route path="/parsing" element={<Parsing />} />
+          
 
         </Routes>
       </Router>

@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import { FiHome, FiUser, FiMessageSquare, FiBarChart2, FiSettings } from 'react-icons/fi';
 import { FaRegLightbulb, FaUserEdit, FaBriefcase } from 'react-icons/fa';
 import logo from '../../assets/logo.png';
 import axios from 'axios';
 
 const Dashboard = ({ name = "Hari" }) => {
+  const navigate = useNavigate();
   const handleResumeOptimizationClick = async () => {
     try {
       // Call your backend endpoint to trigger Streamlit
@@ -26,11 +28,11 @@ const Dashboard = ({ name = "Hari" }) => {
         break;
       case 'Profile Enhancement':
         // Add your profile enhancement logic here
-        alert('Profile Enhancement feature coming soon!');
+        navigate('/profile-enhance');
         break;
       case 'Apply Jobs':
         // Add your apply jobs logic here
-        alert('Job Application feature coming soon!');
+        navigate('/apply-jobs');
         break;
       default:
         break;
