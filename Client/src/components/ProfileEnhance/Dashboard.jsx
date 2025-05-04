@@ -41,7 +41,7 @@ const ProfileDashboard = () => {
               <span className="font-medium">Profile Enhancement</span>
             </div>
           </div>
-          {['Dashboard', 'Resume', 'Messages', 'Settings'].map((item, index) => (
+          {['Dashboard', 'Profile', 'Settings'].map((item, index) => (
             <div key={item} className="px-6 py-3 hover:bg-indigo-800 cursor-pointer text-indigo-200 hover:text-white">
               <div className="flex items-center">
                 {index === 0 && <FiTrendingUp className="mr-3" />}

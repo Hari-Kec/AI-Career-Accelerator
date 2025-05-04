@@ -19,6 +19,7 @@
     "firebase": "^11.6.1",
     "framer-motion": "^12.9.4",
     "groq-sdk": "^0.20.1",
+    "marked": "^15.0.11",
     "mojoauth-web-sdk": "^1.17.19",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^5.2.133",

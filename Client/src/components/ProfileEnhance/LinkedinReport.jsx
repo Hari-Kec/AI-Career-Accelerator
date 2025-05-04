@@ -137,7 +137,7 @@ const LinkedInReport = () => {
             <p className="text-sm text-gray-600 mb-4">
               Don't know how to download your LinkedIn profile as PDF?{' '}
               <a
-                href="https://www.linkedin.com/help/linkedin/answer/a522735"
+                href="https://www.linkedin.com/help/linkedin/answer/a541960"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"

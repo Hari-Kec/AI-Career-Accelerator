@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchProfile, fetchRepos, fetchRepoLanguages } from './api';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
-import GitHubCalendar from 'react-github-calendar';
 import axios from 'axios';
+import GitHubCalendar from 'react-github-calendar';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { fetchProfile, fetchRepos, fetchRepoLanguages } from './api';
+import { marked } from 'marked';
 
 const GitHubReport = () => {
-  const [feedback, setFeedback] = useState(null);
-  const [generating, setGenerating] = useState(false);
   const { username } = useParams();
   const [profile, setProfile] = useState(null);
   const [repos, setRepos] = useState([]);
   const [topLanguages, setTopLanguages] = useState({});
   const [summaryStats, setSummaryStats] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +26,9 @@ const GitHubReport = () => {
         setRepos(repoList);
 
         const languageCount = {};
-        let totalCommits = 0, totalPRs = 0, totalIssues = 0;
+        let totalCommits = 0;
+        let totalPRs = 0;
+        let totalIssues = 0;
 
         for (const repo of repoList.slice(0, 5)) {
           const { data: langs } = await fetchRepoLanguages(username, repo.name);
@@ -68,15 +64,6 @@ const GitHubReport = () => {
 
     analyze();
   }, [username]);
-  const openExternalProfile = (platform) => {
-    if (platform === 'github' && githubUsername) {
-      window.open(`https://github.com/${githubUsername}`, '_blank');
-    } else if (platform === 'linkedin' && linkedinUsername) {
-      window.open(`https://linkedin.com/in/${linkedinUsername}`, '_blank');
-    } else {
-      console.error('Invalid platform or username not provided.');
-    }
-  };
 
   const generateFeedback = async () => {
     try {
@@ -84,7 +71,7 @@ const GitHubReport = () => {
       const res = await axios.post('http://localhost:5000/api/groq/analyze', {
         profile,
         languages: topLanguages,
-        stats: summaryStats
+        stats: summaryStats,
       });
       setFeedback(res.data.feedback);
     } catch (err) {
@@ -97,21 +84,34 @@ const GitHubReport = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 py-10 px-6 md:px-16">
       {loading ? (
-        <p className="text-center text-xl font-medium text-gray-700">Analyzing GitHub profile...</p>
+        <p className="text-center text-xl font-medium text-gray-700">
+          Analyzing GitHub profile...
+        </p>
       ) : (
         <div className="max-w-6xl mx-auto space-y-10">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-indigo-700 mb-2">GitHub Profile Report</h1>
-            <p className="text-gray-600">An AI-powered breakdown of <span className="font-semibold text-indigo-600">{username}</span>'s GitHub activity</p>
+            <p className="text-gray-600">
+              An AI-powered breakdown of{' '}
+              <span className="font-semibold text-indigo-600">{username}</span>'s GitHub activity
+            </p>
           </div>
 
           {profile && (
             <div className="bg-white p-6 shadow-xl rounded-2xl flex flex-col md:flex-row items-center gap-6">
-              <img src={profile.avatar_url} alt="avatar" className="w-28 h-28 rounded-full shadow-md border-4 border-indigo-200" />
+              <img
+                src={profile.avatar_url}
+                alt="avatar"
+                className="w-28 h-28 rounded-full shadow-md border-4 border-indigo-200"
+              />
               <div>
-                <h2 className="text-2xl font-semibold text-gray-800">{profile.name || profile.login}</h2>
+                <h2 className="text-2xl font-semibold text-gray-800">
+                  {profile.name || profile.login}
+                </h2>
                 <p className="text-gray-600 italic mt-1">{profile.bio}</p>
-                <div className="mt-2 text-sm text-gray-500">📁 {profile.public_repos} Repositories • 👥 {profile.followers} Followers</div>
+                <div className="mt-2 text-sm text-gray-500">
+                  📁 {profile.public_repos} Repositories • 👥 {profile.followers} Followers
+                </div>
               </div>
             </div>
           )}
@@ -119,7 +119,12 @@ const GitHubReport = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h3 className="text-lg font-bold text-indigo-700 mb-4">Contribution Calendar</h3>
-              <GitHubCalendar username={username} blockSize={15} blockMargin={5} color="#6366F1" />
+              <GitHubCalendar
+                username={username}
+                blockSize={15}
+                blockMargin={5}
+                color="#6366F1"
+              />
             </div>
 
             {summaryStats && (
@@ -143,19 +148,23 @@ const GitHubReport = () => {
             )}
           </div>
 
-          {/* Languages & Chart */}
           <div className="bg-white p-6 rounded-2xl shadow-xl">
             <h3 className="text-lg font-bold text-indigo-700 mb-4">Top Languages Usage</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
                 {Object.entries(topLanguages).map(([lang, count]) => (
-                  <li key={lang}>{lang}: {count} bytes</li>
+                  <li key={lang}>
+                    {lang}: {count} bytes
+                  </li>
                 ))}
               </ul>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={Object.entries(topLanguages).map(([name, value]) => ({ name, value }))}
+                    data={Object.entries(topLanguages).map(([name, value]) => ({
+                      name,
+                      value,
+                    }))}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
@@ -165,7 +174,10 @@ const GitHubReport = () => {
                     label
                   >
                     {Object.keys(topLanguages).map((_, index) => (
-                      <Cell key={index} fill={`hsl(${index * 60}, 70%, 60%)`} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={`hsl(${index * 60}, 70%, 60%)`}
+                      />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -175,7 +187,6 @@ const GitHubReport = () => {
             </div>
           </div>
 
-          {/* Popular Repos */}
           <div className="bg-white p-6 rounded-2xl shadow-xl">
             <h3 className="text-lg font-bold text-indigo-700 mb-4">Top Starred Repositories</h3>
             <ul className="space-y-4">
@@ -184,17 +195,23 @@ const GitHubReport = () => {
                 .slice(0, 5)
                 .map((repo) => (
                   <li key={repo.id} className="border-l-4 border-indigo-400 pl-4">
-                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="text-indigo-600 text-lg font-semibold hover:underline">
+                    <a
+                      href={repo.html_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-indigo-600 text-lg font-semibold hover:underline"
+                    >
                       {repo.name}
                     </a>
                     <p className="text-sm text-gray-600">{repo.description}</p>
-                    <span className="text-xs text-gray-500">⭐ {repo.stargazers_count}</span>
+                    <span className="text-xs text-gray-500">
+                      ⭐ {repo.stargazers_count}
+                    </span>
                   </li>
                 ))}
             </ul>
           </div>
 
-          {/* AI Feedback */}
           <div className="bg-white p-6 rounded-2xl shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-indigo-700">AI-Powered Profile Feedback</h3>
@@ -209,9 +226,15 @@ const GitHubReport = () => {
               </button>
             </div>
             {feedback && (
-              <div className="text-gray-700 whitespace-pre-line border-t pt-4 border-gray-200">
-                {feedback}
-              </div>
+              <div
+                className="prose max-w-none p-4 bg-gray-50 rounded-lg border border-gray-200 markdown-content"
+                dangerouslySetInnerHTML={{
+                  __html: marked.parse(feedback, {
+                    breaks: true,
+                    gfm: true,
+                  }),
+                }}
+              />
             )}
           </div>
         </div>
