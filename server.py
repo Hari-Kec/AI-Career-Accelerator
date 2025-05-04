@@ -2,21 +2,36 @@ from flask import Flask, jsonify
 import subprocess
 import threading
 from flask_cors import CORS 
-app = Flask(__name__)
-CORS(app)
 
+app = Flask(__name__)
+CORS(app, resources={
+    r"/run-resume-optimizer": {
+        "origins": "http://localhost:5173",
+        "methods": ["GET"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 @app.route('/run-resume-optimizer', methods=['GET'])
 def run_resume_optimizer():
-    def run_streamlit():
-        # Path to your Streamlit app
-        subprocess.run(['streamlit', 'run', 'models/app.py'])
-    
-    # Run in a separate thread to avoid blocking
-    thread = threading.Thread(target=run_streamlit)
-    thread.start()
-    
-    return jsonify({'status': 'Streamlit app is starting...'})
+    try:
+        def run_streamlit():
+            subprocess.run(['streamlit', 'run', 'models/app.py'])
+        
+        thread = threading.Thread(target=run_streamlit)
+        thread.daemon = True  # This makes the thread exit when main program exits
+        thread.start()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Streamlit app is starting...',
+            'url': 'http://localhost:8501'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=5001, debug=True)

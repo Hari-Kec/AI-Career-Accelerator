@@ -1,6 +1,3 @@
-
-
-
 # Imports
 import os
 import csv
@@ -1101,7 +1098,7 @@ def main() -> None:
             "Obstacles are those frightful things you see when you take your eyes off your goal. - Henry Ford",
             "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt"
             ])
-        msg = f"\n{quote}\n\n\nBest regards,\nSai Vignesh Golla\nhttps://www.linkedin.com/in/saivigneshgolla/\n\n"
+        msg = f"\n{quote}\n\n\nBest regards"
         pyautogui.alert(msg, "Exiting..")
         print_lg(msg,"Closing the browser...")
         if tabs_count >= 10:

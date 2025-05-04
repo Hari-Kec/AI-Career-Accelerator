@@ -31,18 +31,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Custom backend authentication
-  const login = async (email, password) => {
-    try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      setUser(response.data.user);
-      localStorage.setItem('token', response.data.token);
-      return response.data.user;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
-
   const register = async (email, password, name, phone) => {
     try {
       const response = await axios.post('/api/auth/register', { 
@@ -51,11 +39,21 @@ export const AuthProvider = ({ children }) => {
         name, 
         phone 
       });
-      setUser(response.data.user);
+      setUser(response.data.user); // Make sure backend returns user data
       localStorage.setItem('token', response.data.token);
       return response.data.user;
     } catch (error) {
-      console.error(error);
+      throw error;
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      const response = await axios.post('/api/auth/login', { email, password });
+      setUser(response.data.user); // Make sure backend returns user data
+      localStorage.setItem('token', response.data.token);
+      return response.data.user;
+    } catch (error) {
       throw error;
     }
   };

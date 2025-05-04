@@ -6,7 +6,12 @@ dotenv.config();
 const router = express.Router();
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
+router.options('/analyze', (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.header('Access-Control-Allow-Methods', 'POST');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.sendStatus(200);
+});
 router.post('/analyze', async (req, res) => {
   try {
     const { profile, languages, stats } = req.body;

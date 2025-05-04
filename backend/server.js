@@ -20,9 +20,10 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:5173', // Your React app's origin
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type']
+  origin: 'http://localhost:5173', // Your frontend origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 app.use(express.json());
 app.use('/api/groq', groqRouter);
@@ -129,7 +130,15 @@ app.post('/api/auth/login', async (req, res) => {
   if (!validPassword) return res.status(400).send('Invalid password');
 
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-  res.send({ user: { email: user.email }, token });
+  res.send({ 
+    user: { 
+      name: user.name,  // Add name to response
+      email: user.email,
+      phone: user.phone,
+      avatar: user.avatar
+    },
+    token
+  });
 });
 
 // Middleware to protect routes
@@ -367,10 +376,7 @@ app.post('/api/run-ai-bot', (req, res) => {
     });
   }
 });
-// Add this simple endpoint for frontend to check if backend is alive
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Server is running' });
-});
+
 
 // Start Server
 const PORT = process.env.PORT || 5000;
