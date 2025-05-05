@@ -33,7 +33,7 @@ const Parsing = () => {
     }, 800);
 
     try {
-      const res = await fetch("http://localhost:5000/api/run-ai-bot", {
+      const res = await fetch("https://ai-career-accelerator.onrender.com/api/run-ai-bot", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

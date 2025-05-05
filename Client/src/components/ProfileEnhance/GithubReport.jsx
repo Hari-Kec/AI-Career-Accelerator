@@ -68,7 +68,7 @@ const GitHubReport = () => {
   const generateFeedback = async () => {
     try {
       setGenerating(true);
-      const res = await axios.post('http://localhost:5000/api/groq/analyze', {
+      const res = await axios.post('https://ai-career-accelerator.onrender.com/api/groq/analyze', {
         profile,
         languages: topLanguages,
         stats: summaryStats,

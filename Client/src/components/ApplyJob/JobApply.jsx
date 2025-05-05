@@ -33,7 +33,7 @@ const JobApply = () => {
   useEffect(() => {
     const clearData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/clear-data', {
+        const response = await fetch('https://ai-career-accelerator.onrender.com/api/clear-data', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ const JobApply = () => {
 
   const handleRemoveFile = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/remove-resume', {
+      const response = await fetch('https://ai-career-accelerator.onrender.com/api/remove-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ const JobApply = () => {
         formDataToSend.append('resume', formData.resume);
       }
   
-      const response = await fetch('http://localhost:5000/api/update-personal-py', {
+      const response = await fetch('https://ai-career-accelerator.onrender.com/api/update-personal-py', {
         method: 'POST',
         body: formDataToSend,
       });

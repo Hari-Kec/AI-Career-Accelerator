@@ -24,9 +24,12 @@ const Dashboard = () => {
 
   const handleResumeOptimizationClick = async () => {
     try {
-      const response = await axios.get('/resume/run-resume-optimizer');
+      // Call backend API deployed on Render
+      const response = await axios.get('https://ai-career-accelerator.onrender.com/resume/run-resume-optimizer');
+  
       if (response.data.status === 'success') {
-        window.open('http://localhost:8501', '_blank');
+        // Open deployed Streamlit app (ML model)
+        window.open('https://ai-career-accelerator-1.onrender.com', '_blank');
       } else {
         alert(response.data.message || 'Failed to start optimizer');
       }
