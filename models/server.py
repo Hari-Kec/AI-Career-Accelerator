@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 import subprocess
 import threading
 from flask_cors import CORS 
-import uvicorn
+
 app = Flask(__name__)
 CORS(app, resources={
     r"/run-resume-optimizer": {
@@ -34,4 +34,4 @@ def run_resume_optimizer():
         }), 500
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=5001)
+    app.run(host="0.0.0.0", port=5001, debug=True)
