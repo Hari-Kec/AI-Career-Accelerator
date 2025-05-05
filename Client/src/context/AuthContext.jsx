@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   // Custom backend authentication
   const register = async (email, password, name, phone) => {
     try {
-      const response = await axios.post('/api/auth/register', { 
+      const response = await axios.post('https://ai-career-accelerator.onrender.com/api/auth/register', { 
         email, 
         password, 
         name, 
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await axios.post('https://ai-career-accelerator.onrender.com/api/auth/login', { email, password });
       setUser(response.data.user); // Make sure backend returns user data
       localStorage.setItem('token', response.data.token);
       return response.data.user;
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       const { user: firebaseUser } = result;
       
       // Send Firebase user data to your backend
-      const response = await axios.post('/api/auth/google', {
+      const response = await axios.post('https://ai-career-accelerator.onrender.com/api/auth/google', {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
         name: firebaseUser.displayName,
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Clear your backend session
-      await axios.post('/api/auth/logout');
+      await axios.post('https://ai-career-accelerator.onrender.com/api/auth/logout');
       
       setUser(null);
       localStorage.removeItem('token');
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     // Check your custom backend authentication
     const token = localStorage.getItem('token');
     if (token) {
-      axios.get('/api/auth/me', { 
+      axios.get('https://ai-career-accelerator.onrender.com/api/auth/me', { 
         headers: { Authorization: `Bearer ${token}` } 
       })
         .then(response => setUser(response.data.user))
