@@ -5,7 +5,9 @@ import {
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from "firebase/auth";
 
 // Initialize Firebase
@@ -29,32 +31,46 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
 
   // Custom backend authentication
-  const register = async (email, password, name, phone) => {
+  const register = async (email, password, name, phone,id) => {
     try {
-      const response = await axios.post('https://ai-career-accelerator.onrender.com/api/auth/register', { 
-        email, 
-        password, 
-        name, 
-        phone 
-      });
-      setUser(response.data.user); // Make sure backend returns user data
-      localStorage.setItem('token', response.data.token);
-      return response.data.user;
+      const response = await axios.post(
+        'https://ai-career-accelerator.onrender.com/api/auth/register', 
+        { email, password, name, phone ,id}
+      );
+      
+      if (response.data.token) {
+        localStorage.setItem('authToken', response.data.token);
+        setAuthToken(response.data.token);
+        setUser(response.data.user);
+        return response.data.user;
+      }
+      throw new Error('No token received');
     } catch (error) {
-      throw error;
+      console.error("Registration error:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Registration failed');
     }
   };
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('https://ai-career-accelerator.onrender.com/api/auth/login', { email, password });
-      setUser(response.data.user); // Make sure backend returns user data
-      localStorage.setItem('token', response.data.token);
-      return response.data.user;
+      const response = await axios.post(
+        'https://ai-career-accelerator.onrender.com/api/auth/login', 
+        { email, password }
+      );
+      
+      if (response.data.token) {
+        localStorage.setItem('authToken', response.data.token);
+        setAuthToken(response.data.token);
+        setUser(response.data.user);
+        return response.data.user;
+      }
+      throw new Error('No token received');
     } catch (error) {
-      throw error;
+      console.error("Login error:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   };
 
@@ -64,20 +80,26 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithPopup(auth, googleProvider);
       const { user: firebaseUser } = result;
       
-      // Send Firebase user data to your backend
-      const response = await axios.post('https://ai-career-accelerator.onrender.com/api/auth/google', {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        name: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL
-      });
+      const response = await axios.post(
+        'https://ai-career-accelerator.onrender.com/api/auth/google',
+        {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL
+        }
+      );
       
-      setUser(response.data.user);
-      localStorage.setItem('token', response.data.token);
-      return response.data.user;
+      if (response.data.token) {
+        localStorage.setItem('authToken', response.data.token);
+        setAuthToken(response.data.token);
+        setUser(response.data.user);
+        return response.data.user;
+      }
+      throw new Error('No token received');
     } catch (error) {
-      console.error("Google sign-in failed:", error);
-      throw error;
+      console.error("Google sign-in error:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Google sign-in failed');
     }
   };
 
@@ -88,44 +110,114 @@ export const AuthProvider = ({ children }) => {
         await auth.signOut();
       }
       
-      // Clear your backend session
-      await axios.post('https://ai-career-accelerator.onrender.com/api/auth/logout');
+      // Clear backend session
+      await axios.post(
+        'https://ai-career-accelerator.onrender.com/api/auth/logout',
+        {},
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
       
+      // Clear local state
       setUser(null);
-      localStorage.removeItem('token');
+      setAuthToken(null);
+      localStorage.removeItem('authToken');
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("Logout error:", error);
+      // Even if logout fails, clear local auth
+      setUser(null);
+      setAuthToken(null);
+      localStorage.removeItem('authToken');
     }
   };
 
+  // Check authentication state on initial load
   useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          const response = await axios.get(
+            'https://ai-career-accelerator.onrender.com/api/auth/me',
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setUser(response.data.user);
+          setAuthToken(token);
+        } catch (error) {
+          console.error("Auth check failed:", error);
+          logout(); // Force logout if token is invalid
+        }
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
+
+    // Firebase auth state listener
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // User is signed in via Firebase
-        // You might want to sync with your backend here
+        // Handle Firebase auth state if needed
       }
     });
 
-    // Check your custom backend authentication
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.get('https://ai-career-accelerator.onrender.com/api/auth/me', { 
-        headers: { Authorization: `Bearer ${token}` } 
-      })
-        .then(response => setUser(response.data.user))
-        .catch(() => logout())
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-
     return () => unsubscribe();
   }, []);
+
+  // Add axios interceptor for token refresh
+  useEffect(() => {
+    const requestInterceptor = axios.interceptors.request.use(
+      config => {
+        if (authToken) {
+          config.headers.Authorization = `Bearer ${authToken}`;
+        }
+        return config;
+      },
+      error => Promise.reject(error)
+    );
+
+    const responseInterceptor = axios.interceptors.response.use(
+      response => response,
+      async error => {
+        const originalRequest = error.config;
+        
+        // If token expired (401) and we haven't already retried
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          
+          try {
+            // Attempt to refresh token
+            const response = await axios.post(
+              'https://ai-career-accelerator.onrender.com/api/auth/refresh',
+              {},
+              { withCredentials: true }
+            );
+            
+            if (response.data.token) {
+              localStorage.setItem('authToken', response.data.token);
+              setAuthToken(response.data.token);
+              originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
+              return axios(originalRequest);
+            }
+          } catch (refreshError) {
+            console.error("Token refresh failed:", refreshError);
+            logout();
+            return Promise.reject(refreshError);
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, [authToken]);
 
   return (
     <AuthContext.Provider value={{ 
       user, 
       loading,
+      authToken,
       login, 
       register, 
       signInWithGoogle,

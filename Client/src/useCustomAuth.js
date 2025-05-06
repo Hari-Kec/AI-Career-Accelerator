@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 
-export const useCustomAuth = () => {
-  const [currentUser, setCurrentUser] = useState(null);
+// export const useCustomAuth = () => {
+//   const [currentUser, setCurrentUser] = useState(null);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
-  }, []);
+//   useEffect(() => {
+//     const storedUser = localStorage.getItem('user');
+//     if (storedUser) {
+//       setCurrentUser(JSON.parse(storedUser));
+//     }
+//   }, []);
 
-  return currentUser;
-};
+//   return currentUser;
+// };

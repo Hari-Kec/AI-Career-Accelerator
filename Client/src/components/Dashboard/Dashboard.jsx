@@ -17,13 +17,13 @@ import Bgimg from '../../assets/resume.png';
 import profile from '../../assets/profile.png';
 import JobsBg from '../../assets/jobs.png';
 import axios from 'axios';
-import { useCustomAuth } from '../../useCustomAuth';
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const user = useCustomAuth();
+  const { user } = useAuth();
 
   const handleResumeOptimizationClick = () => {
-    window.open('https://ai-career-accelerator-2.onrender.com', '_blank');
+    window.open('https://ai-career-accelerator.onrender.com', '_blank');
   };
   
 
@@ -101,7 +101,7 @@ const Dashboard = () => {
         >
           <h1 className="text-3xl font-bold text-black-900">
             Hi, Welcome back{' '}
-            <span className="text-#040646">{user?.name}</span>!
+            <span className="text-#040646">{user?.name || 'User'}</span>!
           </h1>
         </motion.div>
 

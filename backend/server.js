@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 //const { spawn } = require('child_process');
 import child_process from 'child_process';
-
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -36,6 +36,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 // User Model
 // Update your User model
 const User = mongoose.model('User', new mongoose.Schema({
+  uuid: { type: String, unique: true },
   name: { type: String, required: true },
   phone: { type: String },
   email: { type: String, required: true, unique: true },
@@ -61,15 +62,15 @@ const jobApplicationSchema = new mongoose.Schema({
   linkedinEmail: { type: String, required: true },
   linkedinPassword: { type: String, required: true },
   resumePath: { type: String, required: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
-});
+  userId: String, 
+},{ timestamps: true });
 
 const JobApplication = mongoose.model('JobApplication', jobApplicationSchema);
 
 // Google Auth Route
 app.post('/api/auth/google', async (req, res) => {
   const { uid, email, name, photoURL } = req.body;
+  const { v4: uuidv4 } = require('uuid');
 
   try {
     // Check if user exists by Firebase UID or email
@@ -80,6 +81,7 @@ app.post('/api/auth/google', async (req, res) => {
     if (!user) {
       // Create new user for Google auth
       user = new User({
+        uuid: uuidv4(),
         name,
         email,
         firebaseUid: uid,
@@ -92,14 +94,16 @@ app.post('/api/auth/google', async (req, res) => {
       user.firebaseUid = uid;
       user.authProvider = 'google';
       if (!user.avatar) user.avatar = photoURL;
+      if (!user.uuid) user.uuid = uuidv4();
       await user.save();
     }
 
     // Generate JWT token (same as your regular auth)
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ userId: user.uuid }, process.env.JWT_SECRET);
     
     res.send({ 
       user: { 
+        id: user.uuid,
         name: user.name, 
         email: user.email, 
         phone: user.phone,
@@ -122,6 +126,7 @@ app.post('/api/auth/register', async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = new User({ 
+    uuid: uuidv4(),
     name, 
     phone: phone || '', // Make phone optional
     email, 
@@ -131,9 +136,10 @@ app.post('/api/auth/register', async (req, res) => {
 
   await newUser.save();
 
-  const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET);
+  const token = jwt.sign({ userId: newUser.uuid}, process.env.JWT_SECRET);
   res.send({ 
-    user: {  
+    user: {
+      id: newUser.uuid,  
       name: newUser.name, 
       email: newUser.email, 
       phone: newUser.phone 
@@ -152,9 +158,10 @@ app.post('/api/auth/login', async (req, res) => {
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) return res.status(400).send('Invalid password');
 
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+  const token = jwt.sign({ userId: user.uuid}, process.env.JWT_SECRET);
   res.send({ 
     user: { 
+      id: user.uuid,
       name: user.name,  // Add name to response
       email: user.email,
       phone: user.phone,
@@ -166,18 +173,21 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Middleware to protect routes
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.header('Authorization');
+  const authHeader = req.headers['authorization'];
+  
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).send('Access denied');
+    return res.status(401).json({ message: 'Access denied. No token provided.' });
   }
 
   const token = authHeader.replace('Bearer ', '');
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.userId;
     next();
   } catch (err) {
-    res.status(400).send('Invalid token');
+    console.error("JWT verification failed:", err.message);
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
@@ -486,6 +496,7 @@ app.post('/api/update-personal-py', authMiddleware, upload.single('resume'), asy
     // - Sending confirmation emails
 
     res.json({
+      
       success: true,
       message: 'Application submitted successfully',
       applicationId: application._id

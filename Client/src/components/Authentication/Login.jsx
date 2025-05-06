@@ -17,34 +17,16 @@ const Login = () => {
   const [resetStatus, setResetStatus] = useState(null);
   const [isResetting, setIsResetting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-  
     try {
-      await login(email, password); // Firebase login
-  
-      // 🔥 Call your backend to get JWT token
-      const response = await fetch('https://ai-career-accelerator.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to authenticate with backend');
-      }
-  
-      // ✅ Save token and user info
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-  
+      const userCredential = await login(email, password);
+      const token = await userCredential.user.getIdToken();
+      localStorage.setItem('authToken', token);
       navigate('/dashboard');
-  
     } catch (error) {
       setError("Login failed. Please check your credentials.");
       console.error("Login failed:", error);
@@ -57,36 +39,13 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     try {
-      const userCredential = await signInWithGoogle(); // From Firebase
-      const user = userCredential.user;
-  
-      // 🔥 Call your backend to get JWT token
-      const response = await fetch('https://ai-career-accelerator.onrender.com/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName,
-          photoURL: user.photoURL
-        })
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to authenticate with backend');
-      }
-  
-      // ✅ Save token and user info to localStorage
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-  
+      const userCredential = await signInWithGoogle();
+      const token = await userCredential.user.getIdToken();
+      localStorage.setItem('authToken', token);
       navigate('/dashboard');
-  
     } catch (error) {
+      setError("Google sign-in failed. Please try again.");
       console.error("Google sign-in failed:", error);
-      setError(error.message || "Google sign-in failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

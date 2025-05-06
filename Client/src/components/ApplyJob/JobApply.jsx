@@ -60,46 +60,45 @@ const JobApply = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
+    // Basic validation
     if (!formData.resume) {
-      alert("Please upload your resume");
+      alert('Please upload your resume');
       setIsLoading(false);
       return;
     }
-  
-    const token = localStorage.getItem('token');
-  
-    if (!token) {
-      alert("You must be logged in to submit this form.");
-      setIsLoading(false);
-      return;
-    }
-  
-    const formDataToSend = new FormData();
-  
-    for (const [key, value] of Object.entries(formData)) {
-      if (value !== null && value !== undefined) {
-        formDataToSend.append(key, value);
-      }
-    }
-  
+
     try {
-      const response = await fetch('https://ai-career-accelerator.onrender.com/api/update-personal-py', {
+      const formDataToSend = new FormData();
+      
+      // Append all form fields
+      for (const [key, value] of Object.entries(formData)) {
+        if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value);
+        }
+      }
+      const token = localStorage.getItem('authToken');
+      console.log('Sending request with token:', token);
+
+      const response = await fetch('https://ai-career-accelerator.onrender.com/api/update-personal-py' ,{
         method: 'POST',
         body: formDataToSend,
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${authToken}`,
+          
+        },
+        // Don't set Content-Type header - let the browser set it with boundary
       });
-  
+      console.log('Response status:', response.status); 
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to submit application');
       }
-  
+
       const result = await response.json();
-      alert(`Application submitted successfully! ${result.message}`);
-      // Optionally reset form or navigate away
+      alert(`Application submitted successfully!\n${result.message}`);
+      navigate('/parsing'); 
     } catch (error) {
       console.error('Submission error:', error);
       alert(`Error: ${error.message}`);
