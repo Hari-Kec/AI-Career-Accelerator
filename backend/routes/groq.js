@@ -6,12 +6,23 @@ dotenv.config();
 const router = express.Router();
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://careerbuilderai.netlify.app'
+];
+
+// Handle preflight OPTIONS request for CORS
 router.options('/analyze', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.header('Access-Control-Allow-Methods', 'POST');
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.sendStatus(200);
 });
+
 router.post('/analyze', async (req, res) => {
   try {
     const { profile, languages, stats } = req.body;
