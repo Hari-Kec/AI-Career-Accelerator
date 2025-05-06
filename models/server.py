@@ -2,7 +2,13 @@ from flask import Flask, jsonify
 from flask_cors import CORS 
 
 app = Flask(__name__)
-CORS(app)  # Allow all origins for now (tighten later)
+CORS(app, resources={
+    r"/run-resume-optimizer": {
+        "origins": '*',
+        "methods": ["POST"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 @app.route('/run-resume-optimizer', methods=['POST'])  # Change to POST
 def run_resume_optimizer():
