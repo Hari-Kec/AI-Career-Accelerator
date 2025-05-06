@@ -23,7 +23,7 @@ const Dashboard = () => {
   const { user } = useAuth();
 
   const handleResumeOptimizationClick = () => {
-    window.open('https://ai-career-accelerator-2.onrender.com', '_blank');
+    window.open('https://ai-career-accelerator-2.onrender.com/', '_blank');
   };
   
 
