@@ -376,6 +376,22 @@ app.post('/api/run-ai-bot', (req, res) => {
     });
   }
 });
+// In your server.js
+app.post('/resume/run-resume-optimizer', async (req, res) => {
+  try {
+    // Call your Flask service
+    const flaskResponse = await axios.post(
+      'https://ai-career-accelerator-1.onrender.com/run-resume-optimizer'
+    );
+    
+    res.json(flaskResponse.data);
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to start optimizer service'
+    });
+  }
+});
 
 
 // Start Server

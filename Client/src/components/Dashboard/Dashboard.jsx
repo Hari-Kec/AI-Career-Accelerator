@@ -24,18 +24,18 @@ const Dashboard = () => {
 
   const handleResumeOptimizationClick = async () => {
     try {
-      // Call backend API deployed on Render
-      const response = await axios.get('https://ai-career-accelerator.onrender.com/resume/run-resume-optimizer');
+      const response = await axios.post(
+        'https://ai-career-accelerator.onrender.com/resume/run-resume-optimizer'
+      );
   
       if (response.data.status === 'success') {
-        // Open deployed Streamlit app (ML model)
-        window.open('https://ai-career-accelerator-1.onrender.com', '_blank');
+        window.open(response.data.url, '_blank');
       } else {
-        alert(response.data.message || 'Failed to start optimizer');
+        alert(response.data.message);
       }
     } catch (error) {
-      console.error('Error triggering resume optimizer:', error);
-      alert('Failed to start resume optimizer. Please ensure the service is running.');
+      console.error('Error:', error);
+      alert('Service temporarily unavailable');
     }
   };
 
