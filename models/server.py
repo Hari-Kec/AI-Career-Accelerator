@@ -17,7 +17,7 @@ def run_resume_optimizer():
         return jsonify({
             'status': 'success',
             'message': 'Streamlit app is ready',
-            'url': 'https://ai-career-accelerator-1.onrender.com'  # Your deployed Streamlit URL
+            'url': 'https://ai-career-accelerator-2.onrender.com'  # Your deployed Streamlit URL
         })
     except Exception as e:
         return jsonify({

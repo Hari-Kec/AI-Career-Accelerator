@@ -22,27 +22,10 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const handleResumeOptimizationClick = async () => {
-    try {
-      // 🔥 Call Flask app directly (skip Node.js backend)
-      const response = await axios.post(
-        'https://ai-career-accelerator-1.onrender.com/run-resume-optimizer',
-        {}, // empty body
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-  
-      if (response.data.status === 'success') {
-        window.open(response.data.url, '_blank');
-      } else {
-        alert(response.data.message || 'Failed to start optimizer');
-      }
-    } catch (error) {
-      console.error('Error triggering resume optimizer:', error);
-      alert('Failed to start resume optimizer. Please ensure the service is running.');
-    }
+  const handleResumeOptimizationClick = () => {
+    window.open('https://ai-career-accelerator-2.onrender.com', '_blank');
   };
+  
 
   const handleCardClick = (title) => {
     switch (title) {
