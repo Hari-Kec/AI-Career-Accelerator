@@ -25,6 +25,8 @@ const JobApply = () => {
     linkedinPassword: '',
     resume: null
   });
+  const token = localStorage.getItem('authToken');
+  console.log('Sending request with token:', token);
   const [uploadedFileName, setUploadedFileName] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -58,7 +60,7 @@ const JobApply = () => {
     setUploadedFileName(null);
   };
    
-  const { authToken } = useAuth(); 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -85,7 +87,7 @@ const JobApply = () => {
         method: 'POST',
         body: formDataToSend,
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       console.log('Response status:', response.status); 

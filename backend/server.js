@@ -15,7 +15,7 @@ const __dirname = dirname(__filename);
 //const { spawn } = require('child_process');
 import child_process from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
-
+import exec from 'child_process';
 dotenv.config();
 
 const app = express();
@@ -568,6 +568,81 @@ app.get('/api/applications/:id/resume', authMiddleware, async (req, res) => {
     res.download(application.resumePath);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
+
+// At top of server.js, add required imports
+
+
+
+// Keep all your existing code above this line
+
+// Sample test route
+app.get('/api/test', (req, res) => {
+  res.send("API is working!");
+});
+
+// NEW: Run AI Bot endpoint
+app.post('/api/run-ai-bot', authMiddleware, async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    // Step 1: Find user's job application in DB
+    const application = await JobApplication.findOne({ userId });
+
+    if (!application) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
+    // Step 2: Generate content for config/personals.py
+    const personalsContent = `
+first_name = "${application.firstName || ''}"
+last_name = "${application.lastName || ''}"
+phone = "${application.phone || ''}"
+street = "${application.street || ''}"
+city = "${application.city || ''}"
+state = "${application.state || ''}"
+zip_code = "${application.zipCode || ''}"
+country = "${application.country || ''}"
+linkedin_email = "${application.linkedinEmail || ''}"
+linkedin_password = "${application.linkedinPassword || ''}"
+gender = "${application.gender || ''}"
+ethnicity = "${application.ethnicity || ''}"
+disability = "${application.disability || ''}"
+veteran = "${application.veteran || ''}"
+resume_path = "${application.resumePath || ''}"
+`;
+
+    // Step 3: Define paths
+    const personalsPath = path.join(__dirname, '../JobApplyBot/config/personals.py');
+    const pythonScriptPath = path.join(__dirname, '../JobApplyBot/runAiBot.py');
+
+    // Step 4: Write updated config file
+    fs.writeFileSync(personalsPath, personalsContent);
+
+    // Step 5: Execute Python script
+    exec(`python3 ${pythonScriptPath}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Python error: ${stderr}`);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to run AI bot',
+          error: stderr
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'AI Bot executed successfully!',
+        output: stdout
+      });
+    });
+
+  } catch (err) {
+    console.error('Run AI Bot Error:', err);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
 

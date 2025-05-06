@@ -36,7 +36,7 @@ const Parsing = () => {
       const res = await fetch("https://ai-career-accelerator.onrender.com/api/run-ai-bot", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Authorization": `Bearer ${localStorage.getItem('authToken')}`
         }
       });
 

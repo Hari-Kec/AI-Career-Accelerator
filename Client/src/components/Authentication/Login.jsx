@@ -23,9 +23,9 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     try {
-      const userCredential = await login(email, password);
-      const token = await userCredential.user.getIdToken();
-      localStorage.setItem('authToken', token);
+      const response = await login(email, password); // This comes from backend
+      const token = response?.token; // Make sure `login` returns token
+      if (token) localStorage.setItem('authToken', token);
       navigate('/dashboard');
     } catch (error) {
       setError("Login failed. Please check your credentials.");
@@ -39,9 +39,7 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     try {
-      const userCredential = await signInWithGoogle();
-      const token = await userCredential.user.getIdToken();
-      localStorage.setItem('authToken', token);
+      const result = await signInWithGoogle();
       navigate('/dashboard');
     } catch (error) {
       setError("Google sign-in failed. Please try again.");

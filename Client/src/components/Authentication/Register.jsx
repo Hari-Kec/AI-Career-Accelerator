@@ -44,8 +44,7 @@ const Register = () => {
     setError('');
     setIsLoading(true);
     try {
-      const userId = uuidv4();
-      await register(email, password, name, phone, userId);
+      await register(email, password, name, phone);
       navigate('/dashboard');
     } catch (error) {
       setError("Registration failed. Please try again.");
@@ -59,7 +58,7 @@ const Register = () => {
     setError('');
     setIsLoading(true);
     try {
-   
+      const result = await signInWithGoogle();
       navigate('/dashboard');
     } catch (error) {
       setError("Google sign-up failed. Please try again.");
