@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   FiUser, FiMail, FiPhone, FiMapPin, FiHome, 
   FiUpload, FiLock, FiGlobe, FiFlag, FiAward, FiX 
 } from 'react-icons/fi';
 import { FaLinkedin } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-
 
 const JobApply = () => {
   const [formData, setFormData] = useState({
@@ -27,35 +26,8 @@ const JobApply = () => {
     resume: null
   });
   const [uploadedFileName, setUploadedFileName] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  // Clear data on component mount (page refresh/load)
-  useEffect(() => {
-    const clearData = async () => {
-      try {
-        const response = await fetch('https://ai-career-accelerator.onrender.com/api/clear-data', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          const text = await response.text();
-          console.log('Non-JSON response:', text);
-          return;
-        }
-        
-        const result = await response.json();
-        if (!response.ok) {
-          console.error('Failed to clear data:', result.message);
-        }
-      } catch (error) {
-        console.error('Error clearing data:', error);
-      } 
-    };
-    clearData();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -75,66 +47,60 @@ const JobApply = () => {
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: files ? files[0] : value
+        [name]: value
       }));
     }
   };
 
-  const handleRemoveFile = async () => {
-    try {
-      const response = await fetch('https://ai-career-accelerator.onrender.com/api/remove-resume', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      const result = await response.json();
-      if (response.ok) {
-        setUploadedFileName(null);
-        setFormData(prev => ({ ...prev, resume: null }));
-      } else {
-        throw new Error(result.message);
-      }
-    } catch (error) {
-      alert(`Error removing file: ${error.message}`);
-    }
+  const handleRemoveFile = () => {
+    setFormData(prev => ({ ...prev, resume: null }));
+    setUploadedFileName(null);
   };
 
   const handleSubmit = async (e) => {
-    
     e.preventDefault();
-    
+    setIsLoading(true);
+
+    // Basic validation
+    if (!formData.resume) {
+      alert('Please upload your resume');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
       
-      // Append all regular form fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key !== 'resume' && value !== null) {
+      // Append all form fields
+      for (const [key, value] of Object.entries(formData)) {
+        if (value !== null && value !== undefined) {
           formDataToSend.append(key, value);
         }
-      });
-      
-      // Append the resume file if it exists
-      if (formData.resume) {
-        formDataToSend.append('resume', formData.resume);
       }
-  
+
       const response = await fetch('https://ai-career-accelerator.onrender.com/api/update-personal-py', {
         method: 'POST',
         body: formDataToSend,
+        // Don't set Content-Type header - let the browser set it with boundary
       });
-  
-      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error(result.message);
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit application');
       }
 
+      const result = await response.json();
       alert(`Application submitted successfully!\n${result.message}`);
+      // Optionally reset form or navigate away
+      // navigate('/success');
     } catch (error) {
+      console.error('Submission error:', error);
       alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -145,7 +111,6 @@ const JobApply = () => {
           </h2>
           <p className="text-indigo-100 mt-1">Complete your profile to apply for jobs</p>
         </div>
-         
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -166,6 +131,7 @@ const JobApply = () => {
                     type="text"
                     name="firstName"
                     required
+                    value={formData.firstName}
                     className="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     onChange={handleChange}
                   />
@@ -177,6 +143,7 @@ const JobApply = () => {
                 <input
                   type="text"
                   name="middleName"
+                  value={formData.middleName}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -188,6 +155,7 @@ const JobApply = () => {
                   type="text"
                   name="lastName"
                   required
+                  value={formData.lastName}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -205,6 +173,7 @@ const JobApply = () => {
                     type="tel"
                     name="phone"
                     required
+                    value={formData.phone}
                     className="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     onChange={handleChange}
                   />
@@ -216,6 +185,7 @@ const JobApply = () => {
                 <select
                   name="gender"
                   required
+                  value={formData.gender}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 >
@@ -244,6 +214,7 @@ const JobApply = () => {
                   type="text"
                   name="street"
                   required
+                  value={formData.street}
                   className="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -257,6 +228,7 @@ const JobApply = () => {
                   type="text"
                   name="city"
                   required
+                  value={formData.city}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -268,6 +240,7 @@ const JobApply = () => {
                   type="text"
                   name="state"
                   required
+                  value={formData.state}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -279,6 +252,7 @@ const JobApply = () => {
                   type="text"
                   name="zipCode"
                   required
+                  value={formData.zipCode}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -295,6 +269,7 @@ const JobApply = () => {
                   type="text"
                   name="country"
                   required
+                  value={formData.country}
                   className="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -314,6 +289,7 @@ const JobApply = () => {
                 <select
                   name="ethnicity"
                   required
+                  value={formData.ethnicity}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 >
@@ -333,6 +309,7 @@ const JobApply = () => {
                 <select
                   name="disability"
                   required
+                  value={formData.disability}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 >
@@ -348,6 +325,7 @@ const JobApply = () => {
               <select
                 name="veteran"
                 required
+                value={formData.veteran}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 onChange={handleChange}
               >
@@ -374,6 +352,7 @@ const JobApply = () => {
                   type="email"
                   name="linkedinEmail"
                   required
+                  value={formData.linkedinEmail}
                   className="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -390,6 +369,7 @@ const JobApply = () => {
                   type="password"
                   name="linkedinPassword"
                   required
+                  value={formData.linkedinPassword}
                   className="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   onChange={handleChange}
                 />
@@ -452,7 +432,6 @@ const JobApply = () => {
                   type="button"
                   onClick={handleRemoveFile}
                   className="text-xs text-red-600 hover:text-red-800 flex items-center"
-                  
                 >
                   <FiX className="mr-1" /> Remove file
                 </button>
@@ -464,19 +443,26 @@ const JobApply = () => {
           <div className="pt-4">
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md transition duration-200 flex items-center justify-center disabled:opacity-50"
             >
-              <FiAward className="mr-2" /> Submit Application
+              {isLoading ? (
+                'Submitting...'
+              ) : (
+                <>
+                  <FiAward className="mr-2" /> Submit Application
+                </>
+              )}
             </button>
           </div>
-           {/* apply for AI Button */}
-           <div className="pt-4">
+          
+          {/* Apply for Job Button */}
+          <div className="pt-4">
             <button
               type="button"
               onClick={() => navigate('/parsing')}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md transition duration-200 flex items-center justify-center disabled:opacity-50"
             >
-                
               <FiAward className="mr-2" /> Apply for Job
             </button>
           </div>
