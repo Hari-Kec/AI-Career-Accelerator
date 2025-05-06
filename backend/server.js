@@ -70,7 +70,6 @@ const JobApplication = mongoose.model('JobApplication', jobApplicationSchema);
 // Google Auth Route
 app.post('/api/auth/google', async (req, res) => {
   const { uid, email, name, photoURL } = req.body;
-  const { v4: uuidv4 } = require('uuid');
 
   try {
     // Check if user exists by Firebase UID or email

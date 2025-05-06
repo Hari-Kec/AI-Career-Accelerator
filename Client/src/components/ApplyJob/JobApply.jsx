@@ -5,7 +5,7 @@ import {
 } from 'react-icons/fi';
 import { FaLinkedin } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-
+import { useAuth } from '../../context/AuthContext';
 const JobApply = () => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -28,6 +28,7 @@ const JobApply = () => {
   const [uploadedFileName, setUploadedFileName] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+ 
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -56,7 +57,8 @@ const JobApply = () => {
     setFormData(prev => ({ ...prev, resume: null }));
     setUploadedFileName(null);
   };
-
+   
+  const { authToken } = useAuth(); 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -76,8 +78,7 @@ const JobApply = () => {
         if (value !== null && value !== undefined) {
           formDataToSend.append(key, value);
         }
-      }
-      const token = localStorage.getItem('authToken');
+      } 
       console.log('Sending request with token:', token);
 
       const response = await fetch('https://ai-career-accelerator.onrender.com/api/update-personal-py' ,{
@@ -85,9 +86,7 @@ const JobApply = () => {
         body: formDataToSend,
         headers: {
           'Authorization': `Bearer ${authToken}`,
-          
         },
-        // Don't set Content-Type header - let the browser set it with boundary
       });
       console.log('Response status:', response.status); 
 
