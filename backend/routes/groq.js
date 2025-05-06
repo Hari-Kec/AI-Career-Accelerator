@@ -19,13 +19,82 @@ router.options('/analyze', (req, res) => {
   res.sendStatus(200);
 });
 
+// Helper functions for assessments
+function getCommitAssessment(commits) {
+  if (commits > 1000) return "Highly active contributor 🚀";
+  if (commits > 500) return "Very consistent activity 📈";
+  if (commits > 100) return "Moderate contribution 💼";
+  return "Needs more activity 📉";
+}
+
+function getPRAssessment(prs) {
+  if (prs > 200) return "Top collaborator 👥";
+  if (prs > 100) return "Frequent contributor 🔁";
+  if (prs > 20) return "Occasional reviewer 📝";
+  return "Few contributions 📊";
+}
+
+function getIssueAssessment(issues) {
+  if (issues > 300) return "Active issue resolver 🛠️";
+  if (issues > 100) return "Good community involvement 🤝";
+  if (issues > 20) return "Fair participation 🧩";
+  return "Minimal engagement 🕳️";
+}
+
+function formatLanguages(languages) {
+  const total = Object.values(languages).reduce((sum, val) => sum + val, 0);
+  return Object.entries(languages)
+    .map(([name, count]) => ({
+      name,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(1) : 0,
+      icon: getLanguageIcon(name),
+    }))
+    .sort((a, b) => b.percentage - a.percentage)
+    .slice(0, 5);
+}
+
+function getLanguageIcon(langName) {
+  const icons = {
+    JavaScript: '🟨',
+    TypeScript: '🟦',
+    Python: '🟨',
+    Java: '☕',
+    C: '🧱',
+    'C++': '🧱',
+    'C#': '🧱',
+    Go: '🟢',
+    Rust: '🟦',
+    PHP: '🟦',
+    HTML: '🟥',
+    CSS: '🟦',
+    Shell: '🐧',
+    Kotlin: '🔷',
+    Swift: '🍎',
+    Ruby: '🟥',
+    SQL: '🛢️',
+    Dart: '🟣',
+    Scala: '🟣',
+    R: '🟦',
+    Perl: '🦪',
+    Lua: '🌙',
+    Other: '🧩'
+  };
+  return icons[langName] || '🧩';
+}
+
 router.post('/analyze', async (req, res) => {
   try {
     const { profile, languages, stats } = req.body;
 
-    const prompt = `
-You are an expert GitHub profile analyst. Create a detailed, visually appealing report with the following structure:
+    // Compute assessments
+    const commitAssessment = getCommitAssessment(stats.totalCommits);
+    const prAssessment = getPRAssessment(stats.totalPRs);
+    const issueAssessment = getIssueAssessment(stats.totalIssues);
 
+    // Format top languages
+    const formattedLanguages = formatLanguages(languages);
+
+    const prompt = `
 🌟 **GitHub Profile Analysis Report** 🌟
 
 ### 📌 **Profile Overview**
@@ -37,22 +106,28 @@ You are an expert GitHub profile analyst. Create a detailed, visually appealing 
 ### 📊 **Activity Metrics**
 | Metric        | Count | Icon   | Assessment       |
 |--------------|-------|--------|------------------|
-| **Commits**  | ${stats.totalCommits} | 💾 | ${getCommitAssessment(stats.totalCommits)} |
-| **PRs**      | ${stats.totalPRs} | 🔀 | ${getPRAssessment(stats.totalPRs)} |
-| **Issues**   | ${stats.totalIssues} | 🐛 | ${getIssueAssessment(stats.totalIssues)} |
+| **Commits**  | ${stats.totalCommits} | 💾 | ${commitAssessment} |
+| **PRs**      | ${stats.totalPRs}     | 🔀 | ${prAssessment}     |
+| **Issues**   | ${stats.totalIssues}  | 🐛 | ${issueAssessment}  |
 
 ### 👨‍💻 **Technical Footprint**
 **Top Languages**: 
-${formatLanguages(languages).map(lang => `- ${lang.icon} ${lang.name} (${lang.percentage}%)`).join('\n')}
+${formattedLanguages.map(lang => `- ${lang.icon} ${lang.name} (${lang.percentage}%)`).join('\n')}
 
 ### 🏆 **Key Strengths**
-${['✅ Consistent contributor', '✅ Strong documentation', '✅ Active in community'].map(strength => `- ${strength}`).join('\n')}
+- ✅ Consistent contributor
+- ✅ Strong documentation
+- ✅ Active in community
 
 ### 📈 **Growth Opportunities**
-${['🌱 Expand to new technologies', '📣 Increase community engagement', '🔍 Improve issue response time'].map(opp => `- ${opp}`).join('\n')}
+- 🌱 Expand to new technologies
+- 📣 Increase community engagement
+- 🔍 Improve issue response time
 
 ### 💡 **Recommendations**
-${['✨ Add more project documentation', '🤝 Collaborate on open-source', '📊 Showcase projects in READMEs'].map(rec => `- ${rec}`).join('\n')}
+- ✨ Add more project documentation
+- 🤝 Collaborate on open-source
+- 📊 Showcase projects in READMEs
 
 **Formatting Rules**:
 1. Use markdown formatting
