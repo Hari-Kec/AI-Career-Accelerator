@@ -43,9 +43,29 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+  
     try {
-      await register(email, password, name, phone);
+      await register(email, password, name, phone); // Firebase register
+  
+      // 🔥 Send user data to your backend
+      const response = await fetch('https://ai-career-accelerator.onrender.com/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, email, password })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to register on backend');
+      }
+  
+      // ✅ Save token and user info
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+  
       navigate('/dashboard');
+  
     } catch (error) {
       setError("Registration failed. Please try again.");
       console.error("Registration failed:", error);
