@@ -34,8 +34,7 @@ const Dashboard = () => {
       );
   
       if (response.data.status === 'success') {
-        // Open deployed Streamlit app
-        window.open('https://ai-career-accelerator-1.onrender.com', '_blank');
+        window.open(response.data.url, '_blank');
       } else {
         alert(response.data.message || 'Failed to start optimizer');
       }
