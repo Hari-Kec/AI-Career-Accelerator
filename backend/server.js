@@ -15,7 +15,7 @@ const __dirname = dirname(__filename);
 //const { spawn } = require('child_process');
 import child_process from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
-import exec from 'child_process';
+import {exec } from 'child_process';
 dotenv.config();
 
 const app = express();
