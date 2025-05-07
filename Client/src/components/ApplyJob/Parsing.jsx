@@ -36,7 +36,7 @@ const Parsing = () => {
     }, 800);
 
     try {
-      const res = await fetch("https://ff4a-103-218-133-171.ngrok-free.app/run", {
+      const res = await fetch("https://45ae-3-92-65-22.ngrok-free.app/run", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +137,7 @@ const Parsing = () => {
                         <h4 className="text-xl font-semibold mb-2">
                           {status === 'loading' ? 'Processing' :
                            status === 'success' ? 'Success!' :
-                           'Error Occurred'}
+                           'Please be Patient..Loading'}
                         </h4>
                         <p className="text-lg">{message}</p>
                       </div>
