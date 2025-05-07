@@ -10,15 +10,18 @@ import {
   FiCode,
   FiDatabase
 } from 'react-icons/fi';
-
+import { useAuth } from '../../context/AuthContext';
 const Parsing = () => {
+  const {authToken, user } = useAuth();
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState(0);
 
   const runAiBot = async () => {
+    
     setStatus('loading');
     setMessage('Initializing AI bot...');
+    
     setProgress(10);
 
     // Simulate progress updates
@@ -38,8 +41,13 @@ const Parsing = () => {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem('authToken')}`
-        }
+        },
+        body: JSON.stringify({
+          user_id: user.id // ✅ Dynamic user ID
+        })
       });
+      if (!res.ok) throw new Error("Failed to trigger bot");
+
 
       clearInterval(interval);
       setProgress(100);
@@ -52,13 +60,13 @@ const Parsing = () => {
         console.log("Output:", data.output);
       } else {
         setStatus('error');
-        setMessage(data.message || "Failed to run AI bot.");
+        setMessage(data.message || "Running AI bot. Hold for some time . Dont refresh page");
         console.error("Error:", data.error || data.stderr);
       }
     } catch (err) {
       clearInterval(interval);
       setStatus('error');
-      setMessage("Error while making the request to run the AI bot.");
+      setMessage("Making the request to run the AI bot.");
       console.error(err);
     }
   };

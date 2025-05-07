@@ -15,22 +15,27 @@ def home():
 @app.route('/run', methods=['POST', 'OPTIONS'])
 def trigger_bot():
     if request.method == 'OPTIONS':
-        # Respond to preflight OPTIONS request
         response = jsonify({'message': 'CORS preflight OK'})
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
         response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
         return response
 
-    # Spawn your bot in a thread
+    # Get user_id from request body
+    data = request.json
+    user_id = data.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+
     def run_bot():
-        subprocess.run(["python", "runAiBot.py"])
+        subprocess.run(["python", "runAiBot.py", "--user_id", user_id])
 
-    threading.Thread(target=run_bot).start()
+    thread = threading.Thread(target=run_bot)
+    thread.start()
 
-    response = jsonify({"status": "Bot started successfully"})
+    response = jsonify({"status": "Bot started", "user_id": user_id})
     response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
+    return response, 200
 
 if __name__ == '__main__':
     app.run(debug=True)

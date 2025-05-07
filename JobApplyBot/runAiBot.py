@@ -1,11 +1,12 @@
 
 
+
 # Imports
 import os
 import csv
 import re
 import pyautogui
-
+from pymongo import MongoClient
 from random import choice, shuffle, randint
 from datetime import datetime
 
@@ -16,10 +17,10 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, NoSuchWindowException, ElementNotInteractableException
 
-from config.personals import *
+# from config.personals import *
 from config.questions import *
 from config.search import *
-from config.secrets import use_AI, username, password
+# from config.secrets import use_AI, username, password
 from config.settings import *
 
 from modules.open_chrome import *
@@ -32,8 +33,111 @@ from typing import Literal
 
 
 pyautogui.FAILSAFE = False
-# if use_resume_generator:    from resume_generator import is_logged_in_GPT, login_GPT, open_resume_chat, create_custom_resume
 
+# MongoDB Connection
+def fetch_user_data():
+    """
+    Fetch user data from MongoDB.
+    """
+    try:
+        # Connect to MongoDB
+        client = MongoClient("mongodb+srv://haris22aim:K28zWwdDcxo8sq9D@cluster0.y9whkqt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")  # Replace with your MongoDB URI
+        db = client["test"]  # Replace with your database name
+        collection = db["jobapplications"]  # Replace with your collection name
+
+        # Fetch the first user document (modify query as needed)
+        document = collection.find_one()
+
+        if not document:
+            raise Exception("No user data found in MongoDB.")
+
+        # Extract user data
+        user_data = {
+            "first_name": document.get("firstName", ""),
+            "middle_name": document.get("middleName", ""),
+            "last_name": document.get("lastName", ""),
+            "phone": document.get("phone", ""),
+            "street": document.get("street", ""),
+            "city": document.get("city", ""),
+            "state": document.get("state", ""),
+            "zip_code": document.get("zipCode", ""),
+            "country": document.get("country", ""),
+            "linkedin_email": document.get("linkedinEmail", ""),
+            "linkedin_password": document.get("linkedinPassword", ""),
+            "gender": document.get("gender", ""),
+            "ethnicity": document.get("ethnicity", ""),
+            "disability": document.get("disability", ""),
+            "veteran": document.get("veteran", ""),
+            "resume_path": document.get("resumePath", ""),
+        }
+
+        return user_data
+
+    except Exception as e:
+        print(f"Error fetching user data from MongoDB: {e}")
+        raise
+
+# Fetch user data from MongoDB
+user_data = fetch_user_data()
+
+# Assign user data to variables
+first_name = user_data["first_name"].strip()
+middle_name = user_data["middle_name"].strip()
+last_name = user_data["last_name"].strip()
+full_name = f"{first_name} {middle_name} {last_name}" if middle_name else f"{first_name} {last_name}"
+phone_number = user_data["phone"]
+street = user_data["street"]
+current_city = user_data["city"]
+state = user_data["state"]
+zipcode = user_data["zip_code"]
+country = user_data["country"]
+linkedin_email = user_data["linkedin_email"]
+linkedin_password = user_data["linkedin_password"]
+gender = user_data["gender"]
+ethnicity = user_data["ethnicity"]
+disability_status = user_data["disability"]
+veteran_status = user_data["veteran"]
+default_resume_path = user_data["resume_path"]
+
+# Other global variables
+# useNewResume = True
+# randomly_answered_questions = set()
+# tabs_count = 1
+# easy_applied_count = 0
+# external_jobs_count = 0
+# failed_count = 0
+# skip_count = 0
+# dailyEasyApplyLimitReached = False
+# # Global variables with default values
+# date_posted = "Any time"  # Default to "Any time"
+# sort_by = "Most recent"  # Default to "Most relevant"
+# search_terms = ["Full Stack Developer"]  # Example search terms
+# search_location = "India"  # Default search location
+# experience_level = None
+# companies = None  # Default to None if not filtering by companies
+# job_type = None  # Default to None if not filtering by job type
+# on_site = None  # Default to None if not filtering by work location
+# location = None  # Default to None if not filtering by location
+# industry = None  # Default to None if not filtering by industry
+# job_function = None  # Default to None if not filtering by job function
+# job_titles = None  # Default to None if not filtering by job titles
+# salary = None  # Default to None if not filtering by salary
+# benefits = None  # Default to None if not filtering by benefits
+# commitments = None  # Default to None if not filtering by commitments
+# easy_apply_only = True  # Default to False
+# under_10_applicants = False  # Default to False
+# in_your_network = False  # Default to False
+# fair_chance_employer = False  # Default to False
+# pause_after_filters = False  # Default to False
+# cycle_date_posted = False  # Default to False
+# alternate_sortby = False  # Default to False
+# stop_date_cycle_at_24hr = False  # Default to False
+# randomize_search_order = False  # Default to False
+
+
+
+
+# Rest of the code remains unchanged...
 
 #< Global Variables and logics
 
@@ -1085,13 +1189,27 @@ def main() -> None:
         print_lg("Total applied or collected:     {}".format(easy_applied_count + external_jobs_count))
         print_lg("\nFailed jobs:                    {}".format(failed_count))
         print_lg("Irrelevant jobs skipped:        {}\n".format(skip_count))
-        
-        
-        pyautogui.alert( "Exiting..")
+        if randomly_answered_questions: print_lg("\n\nQuestions randomly answered:\n  {}  \n\n".format(";\n".join(str(question) for question in randomly_answered_questions)))
+        quote = choice([
+            "You're one step closer than before.", 
+            "All the best with your future interviews.", 
+            "Keep up with the progress. You got this.", 
+            "If you're tired, learn to take rest but never give up.",
+            "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
+            "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle. - Christian D. Larson",
+            "Every job is a self-portrait of the person who does it. Autograph your work with excellence.",
+            "The only way to do great work is to love what you do. If you haven't found it yet, keep looking. Don't settle. - Steve Jobs",
+            "Opportunities don't happen, you create them. - Chris Grosser",
+            "The road to success and the road to failure are almost exactly the same. The difference is perseverance.",
+            "Obstacles are those frightful things you see when you take your eyes off your goal. - Henry Ford",
+            "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt"
+            ])
+        msg = f"\n{quote}\n\n\nBest regards,\nSai Vignesh Golla\nhttps://www.linkedin.com/in/saivigneshgolla/\n\n"
+        pyautogui.alert(msg, "Exiting..")
         print_lg(msg,"Closing the browser...")
         if tabs_count >= 10:
-            
-            pyautogui.alert("close tabs")
+            msg = "NOTE: IF YOU HAVE MORE THAN 10 TABS OPENED, PLEASE CLOSE OR BOOKMARK THEM!\n\nOr it's highly likely that application will just open browser and not do anything next time!" 
+            pyautogui.alert(msg,"Info")
             print_lg("\n"+msg)
         ai_close_openai_client(aiClient)
         try: driver.quit()
