@@ -6,7 +6,8 @@ import threading
 app = Flask(__name__)
 
 # Allow CORS from your local frontend only
-CORS(app, origins="*", supports_credentials=True, allow_headers=["Content-Type", "Authorization"])
+CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://your-ngrok-url.ngrok-free.app"]}}, supports_credentials=True)
+
 
 @app.route('/')
 def home():
