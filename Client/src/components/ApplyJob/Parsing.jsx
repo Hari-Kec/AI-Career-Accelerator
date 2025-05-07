@@ -33,7 +33,7 @@ const Parsing = () => {
     }, 800);
 
     try {
-      const res = await fetch("https://ai-career-accelerator.onrender.com/api/run-ai-bot", {
+      const res = await fetch("https://ai-career-accelerator-jobapplybot.onrender.com/api/run-ai-bot", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem('authToken')}`

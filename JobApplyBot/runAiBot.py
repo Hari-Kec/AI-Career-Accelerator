@@ -1,3 +1,5 @@
+
+
 # Imports
 import os
 import csv
@@ -17,14 +19,14 @@ from selenium.common.exceptions import NoSuchElementException, ElementClickInter
 from config.personals import *
 from config.questions import *
 from config.search import *
-from config.secrets import use_AI
+from config.secrets import use_AI, username, password
 from config.settings import *
 
 from modules.open_chrome import *
 from modules.helpers import *
 from modules.clickers_and_finders import *
 from modules.validator import validate_config
-
+from modules.ai.openaiConnections import *
 
 from typing import Literal
 
@@ -395,8 +397,6 @@ def get_job_description(
 # Function to upload resume
 def upload_resume(modal: WebElement, resume: str) -> tuple[bool, str]:
     try:
-
-        
         modal.find_element(By.NAME, "file").send_keys(os.path.abspath(resume))
         return True, os.path.basename(default_resume_path)
     except: return False, "Previous resume"
@@ -1100,7 +1100,7 @@ def main() -> None:
             "Obstacles are those frightful things you see when you take your eyes off your goal. - Henry Ford",
             "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt"
             ])
-        msg = f"\n{quote}\n\n\nBest regards"
+        msg = f"\n{quote}\n\n\nBest regards,\nSai Vignesh Golla\nhttps://www.linkedin.com/in/saivigneshgolla/\n\n"
         pyautogui.alert(msg, "Exiting..")
         print_lg(msg,"Closing the browser...")
         if tabs_count >= 10:
@@ -1110,7 +1110,6 @@ def main() -> None:
         ai_close_openai_client(aiClient)
         try: driver.quit()
         except Exception as e: critical_error_log("When quitting...", e)
-
 
 
 if __name__ == "__main__":
