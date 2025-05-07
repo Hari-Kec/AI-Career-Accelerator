@@ -33,9 +33,10 @@ const Parsing = () => {
     }, 800);
 
     try {
-      const res = await fetch("https://ai-career-accelerator-jobapplybot.onrender.com/api/run-ai-bot", {
+      const res = await fetch("https://0881-103-218-133-171.ngrok-free.app/run", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem('authToken')}`
         }
       });

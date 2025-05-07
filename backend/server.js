@@ -585,64 +585,65 @@ app.get('/api/test', (req, res) => {
 });
 
 // NEW: Run AI Bot endpoint
-app.post('/api/run-ai-bot', authMiddleware, async (req, res) => {
+app.post('/api/update-personals-py', authMiddleware, async (req, res) => {
   const userId = req.userId;
 
   try {
-    // Step 1: Find user's job application in DB
+    // Find user's job application in DB
     const application = await JobApplication.findOne({ userId });
 
     if (!application) {
       return res.status(404).json({ success: false, message: 'Application not found' });
     }
 
-    // Step 2: Generate content for config/personals.py
-    const personalsContent = `
-first_name = "${application.firstName || ''}"
-last_name = "${application.lastName || ''}"
-phone = "${application.phone || ''}"
+    // Generate the complete personals.py content
+    const personalsContent = `# Personal Information Configuration
+first_name = "${application.firstName || ''}"                 # Your first name
+middle_name = "${application.middleName || ''}"               # Middle name
+last_name = "${application.lastName || ''}"                   # Your last name
+
+phone_number = "${application.phone || ''}"                   # Phone number
+
+current_city = "${application.city || ''}"                    # Current city
+'''
+Note: If left empty as "", the bot will fill in location of jobs location.
+'''
+
 street = "${application.street || ''}"
-city = "${application.city || ''}"
 state = "${application.state || ''}"
-zip_code = "${application.zipCode || ''}"
+zipcode = "${application.zipCode || ''}"
 country = "${application.country || ''}"
-linkedin_email = "${application.linkedinEmail || ''}"
-linkedin_password = "${application.linkedinPassword || ''}"
-gender = "${application.gender || ''}"
-ethnicity = "${application.ethnicity || ''}"
-disability = "${application.disability || ''}"
-veteran = "${application.veteran || ''}"
-resume_path = "${application.resumePath || ''}"
+
+ethnicity = "${application.ethnicity || ''}"                  # Ethnicity
+gender = "${application.gender || ''}"                        # Gender
+disability_status = "${application.disability || 'No'}"       # Disability status
+veteran_status = "${application.veteran || 'No'}"            # Veteran status
+
+username = "${application.linkedinEmail || ''}"               # LinkedIn email
+password = "${application.linkedinPassword || ''}"            # LinkedIn password
+
+resume_path = "${application.resumePath || ''}"               # Resume path
 `;
 
-    // Step 3: Define paths
+    // Define path to personals.py
     const personalsPath = path.join(__dirname, '../JobApplyBot/config/personals.py');
-    const pythonScriptPath = path.join(__dirname, '../JobApplyBot/runAiBot.py');
 
-    // Step 4: Write updated config file
+    // Write the updated config file
     fs.writeFileSync(personalsPath, personalsContent);
 
-    // Step 5: Execute Python script
-    exec(`python3 ${pythonScriptPath}`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Python error: ${stderr}`);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to run AI bot',
-          error: stderr
-        });
-      }
-
-      res.json({
-        success: true,
-        message: 'AI Bot executed successfully!',
-        output: stdout
-      });
+    res.json({
+      success: true,
+      message: 'personals.py updated successfully!',
+      filePath: personalsPath
     });
 
   } catch (err) {
-    console.error('Run AI Bot Error:', err);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error('Update personals.py Error:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update personals.py',
+      error: err.message 
+    });
   }
 });
 
