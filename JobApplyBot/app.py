@@ -5,20 +5,32 @@ import threading
 
 app = Flask(__name__)
 
-# Allow CORS from your local frontend only
-CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://0881-103-218-133-171.ngrok-free.app"]}}, supports_credentials=True)
-
+# This allows ALL origins and methods (good for dev, restrict later for prod)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 @app.route('/')
 def home():
     return "LinkedIn Bot API is running!"
 
-@app.route('/run', methods=['POST'])  # change to POST if your React code uses POST
+@app.route('/run', methods=['POST', 'OPTIONS'])
 def trigger_bot():
+    if request.method == 'OPTIONS':
+        # Respond to preflight OPTIONS request
+        response = jsonify({'message': 'CORS preflight OK'})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+        response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
+        return response
+
+    # Spawn your bot in a thread
     def run_bot():
         subprocess.run(["python", "runAiBot.py"])
+
     threading.Thread(target=run_bot).start()
-    return jsonify({"status": "Bot started successfully"}), 200
+
+    response = jsonify({"status": "Bot started successfully"})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)

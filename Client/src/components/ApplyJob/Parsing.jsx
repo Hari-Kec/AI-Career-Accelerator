@@ -33,7 +33,7 @@ const Parsing = () => {
     }, 800);
 
     try {
-      const res = await fetch("https://0881-103-218-133-171.ngrok-free.app/run", {
+      const res = await fetch("https://ff4a-103-218-133-171.ngrok-free.app/run", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
