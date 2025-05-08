@@ -262,12 +262,12 @@ const Login = () => {
               </motion.div>
             </motion.div>
 
-            <motion.p variants={itemVariants} className="text-center text-md text-blue-600 mt-6">
+            {/* <motion.p variants={itemVariants} className="text-center text-md text-blue-600 mt-6">
               Don't have an account?{" "}
               <a href="/register" className="text-blue-700 font-medium hover:underline">
                 Sign up
               </a>
-            </motion.p>
+            </motion.p> */}
           </motion.div>
         </div>
       </motion.div>
