@@ -8,6 +8,7 @@ import Register from './components/Authentication/Register';
 //MAIN DASHBOARD
 import Dashboard from './components/Dashboard/Dashboard';
 import Profile from './components/Dashboard/Profile';
+import Settings from './components/Dashboard/Settings';
 //PROFILE ENHANCE
 import ProfileDashboard from './components/ProfileEnhance/Dashboard'
 import GitHubReport from './components/ProfileEnhance/GithubReport';
@@ -27,6 +28,7 @@ function App() {
 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
 
           <Route path="/profile-enhance" element={<ProfileDashboard />} />
           <Route path="/github-report/:username" element={<GitHubReport />} />

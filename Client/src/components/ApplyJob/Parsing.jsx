@@ -16,6 +16,7 @@ const Parsing = () => {
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
 
   const runAiBot = async () => {
     
@@ -36,7 +37,7 @@ const Parsing = () => {
     }, 800);
 
     try {
-      const res = await fetch("https://45ae-3-92-65-22.ngrok-free.app/run", {
+      const res = await fetch("https://ff4a-103-218-133-171.ngrok-free.app/run", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,9 +71,13 @@ const Parsing = () => {
       console.error(err);
     }
   };
+  const handleApplyClick = () => {
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 5000); // Hide after 5s
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">
@@ -103,79 +108,24 @@ const Parsing = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                       <FiTerminal className="text-blue-600" />
-                      Python Script Execution
+                      Execution
                     </h3>
-                    
                   </div>
                   <button
-                    onClick={runAiBot}
-                    disabled={status === 'loading'}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-3 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                    onClick={handleApplyClick}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-3 focus:outline-none focus:ring-4 focus:ring-green-300"
                   >
-                    <FiZap className={`text-xl ${status === 'loading' ? 'animate-pulse' : ''}`} />
-                    <span className="text-lg font-semibold">
-                      {status === 'loading' ? 'Processing...' : 'Run AI Bot'}
-                    </span>
+                    <FiZap className="text-xl" />
+                    <span className="text-lg font-semibold">Start Applying to Jobs</span>
                   </button>
                 </div>
               </div>
-
-              {status !== 'idle' && (
-                <div className="space-y-6">
-                  <div className={`p-6 rounded-xl shadow-inner flex flex-col ${
-                    status === 'loading' ? 'bg-yellow-50 border border-yellow-200' :
-                    status === 'success' ? 'bg-green-50 border border-green-200' :
-                    'bg-red-50 border border-red-200'
-                  }`}>
-                    <div className="flex items-start gap-4">
-                      <div className="pt-1">
-                        {status === 'loading' && <FiLoader className="text-3xl text-yellow-600 animate-spin" />}
-                        {status === 'success' && <FiCheckCircle className="text-3xl text-green-600 animate-bounce" />}
-                        {status === 'error' && <FiAlertCircle className="text-3xl text-red-600 animate-bounce" />}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-xl font-semibold mb-2">
-                          {status === 'loading' ? 'Processing' :
-                           status === 'success' ? 'Success!' :
-                           'Please be Patient..Loading'}
-                        </h4>
-                        <p className="text-lg">{message}</p>
-                      </div>
-                    </div>
-
-                    {status === 'loading' && (
-                      <div className="mt-6">
-                        <div className="flex justify-between text-sm text-gray-600 mb-1">
-                          <span>Progress</span>
-                          <span>{progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-4">
-                          <div
-                            className="bg-blue-600 h-4 rounded-full transition-all duration-500 ease-out"
-                            style={{ width: `${progress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {status === 'success' && (
-                    <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 flex items-center gap-4">
-                      <FiMessageCircle className="text-3xl text-blue-600" />
-                      <div>
-                        <h4 className="text-lg font-semibold text-blue-800">Output Generated</h4>
-                        <p className="text-blue-700">Check your console for detailed execution output.</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <FiCode className="text-4xl text-blue-600 mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Python Script</h3>
-                  <p className="text-gray-600">Executes the runAiBot.py file from your JobApplyBot directory</p>
+                  <p className="text-gray-600">Executes the Python file</p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
                   <FiDatabase className="text-4xl text-blue-600 mb-4" />
@@ -192,6 +142,19 @@ const Parsing = () => {
           </div>
         </div>
       </div>
+
+      {/* Tailwind Popup Notification */}
+      {showPopup && (
+        <div className="fixed bottom-6 right-6 bg-white border border-green-300 rounded-xl shadow-2xl p-6 flex items-start gap-4 animate-fade-in-up z-50">
+          <FiCheckCircle className="text-3xl text-green-600 mt-1 animate-bounce" />
+          <div>
+            <h4 className="text-lg font-bold text-green-800">Successfully Submitted!</h4>
+            <p className="text-gray-700">
+              You will be notified via email. Updates on job applications will be sent to your inbox.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

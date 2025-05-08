@@ -36,7 +36,7 @@ const Dashboard = () => {
         navigate('/profile-enhance');
         break;
       case 'Apply Jobs':
-        navigate('/apply-jobs');
+        navigate('/parsing');
         break;
       default:
         break;
@@ -75,9 +75,18 @@ const Dashboard = () => {
           {['Profile', 'Settings'].map((item, index) => {
             const icons = [FiUser, FiSettings];
             const Icon = icons[index];
+            const handleSidebarClick = () => {
+              if (item === 'Profile') {
+                navigate('/apply-jobs'); // Redirect "Profile" to Apply Jobs
+              } else if (item === 'Settings') {
+                navigate('/settings'); // You can change this path to wherever your settings route is
+              }
+            };
+          
             return (
               <motion.div
                 key={item}
+                onClick={handleSidebarClick}
                 whileHover={{ scale: 1.02 }}
                 className="px-6 py-3 hover:bg-blue-700 cursor-pointer text-blue-200 hover:text-white transition-colors"
               >

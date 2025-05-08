@@ -114,7 +114,7 @@ const JobApply = () => {
         {/* Header */}
         <div className="bg-indigo-600 py-4 px-6">
           <h2 className="text-2xl font-bold text-white flex items-center">
-            <FiUser className="mr-2" /> Job Application Form
+            <FiUser className="mr-2" /> Profile
           </h2>
           <p className="text-indigo-100 mt-1">Complete your profile to apply for jobs</p>
         </div>
@@ -464,7 +464,7 @@ const JobApply = () => {
           </div>
           
           {/* Apply for Job Button */}
-          <div className="pt-4">
+          {/* <div className="pt-4">
             <button
               type="button"
               onClick={() => navigate('/parsing')}
@@ -472,7 +472,7 @@ const JobApply = () => {
             >
               <FiAward className="mr-2" /> Apply for Job
             </button>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>
