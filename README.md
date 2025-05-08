@@ -1,49 +1,154 @@
-# AI-Career-Accelerator
-An integrated solution that empowers students to optimize their professional profiles, discover targeted job opportunities, and track applications through AI-driven automation.
 
-cd Client
-npm install vite@latest
-npm install react-icons react-hot-toast react-hook-form @hookform/resolvers zod
-npm install react-router-dom
-npm install axios
+# CareerbuildAi
 
+> *An AI-driven platform to empower students in optimizing their professional profiles, discovering targeted job opportunities, and automating job applications.*
+
+![License](https://img.shields.io/badge/license-Apache%202.0-blue)
+![Tech Stack](https://img.shields.io/badge/techstack-React,%20Node.js,%20MongoDB-brightgreen)
+
+## 📌 Project Overview
+
+**CareerbuildAi** is an integrated solution designed specifically for college students aiming to excel in off-campus placements and enhance their career profiles. Powered by AI automation, it enables users to:
+
+- ✅ Optimize resumes using ATS (Applicant Tracking System) analysis  
+- ✅ Apply to **100+ jobs at once** via LinkedIn automation  
+- ✅ Get personalized profile suggestions for GitHub & LinkedIn  
+- ✅ Track application status seamlessly  
+
+This tool streamlines the entire job hunting process — from building a strong resume to landing interviews.
+
+---
+
+## 🧩 Key Features
+
+| Feature | Description |
+|--------|-------------|
+| 🔍 Resume ATS Checker & Optimizer | Analyze and improve your resume with AI-powered feedback |
+| 🤖 One-click Bulk Job Application | Apply to 100+ jobs in one go using LinkedIn automation |
+| 💼 Personalized Profile Advisor | Get tailored advice for GitHub and LinkedIn profiles |
+| 📊 Application Tracker | Monitor your job applications, statuses, and follow-ups |
+| 🔐 Secure Authentication | Firebase & MojoAuth-based secure login system |
+
+---
+
+## ⚙️ Tech Stack
+
+### 🧑‍💻 Frontend
+- React + Vite
+- Tailwind CSS
+- React Icons, React Hook Form, Zod Validator
+- React Router DOM
+- Axios for API calls
+
+### 🧑‍🔧 Backend
+- Node.js + Express
+- MongoDB + Mongoose ORM
+- Firebase Admin SDK (Authentication)
+- Nodemailer, Crypto, JWT, Groq SDK
+
+### 🤖 Job Automation Bot
+- Python, Flask
+- Selenium, PyAutoGUI, OpenAI SDK
+- Undetected-Chromedriver, Webdriver Manager
+- Requests, BeautifulSoup, Trio Websocket
+
+### 📄 Resume Analyzer
+- Streamlit UI
+- Spacy, NLTK, Scikit-learn
+- PDFMiner, PyPDF2, Docx2txt
+- Google Generative AI, OpenRouter API
+
+### ☁️ Hosting & Infrastructure
+- AWS EC2 (Backend Server)
+- Dockerized Deployment
+- Ngrok for local tunneling
+- Apache2 License
+
+---
+
+## 🛠️ Installation & Setup
+
+### Prerequisites
+- Node.js (v18+)
+- Python 3.10+
+- MongoDB Atlas or Local Instance
+- Firebase Project Setup
+- AWS EC2 Access (Optional for deployment)
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Hari-Kec/AI-Career-Accelerator.git
+cd AI-Career-Accelerator
+```
+
+### 🧱 Frontend Setup
+
+```bash
+cd client
+npm install vite@latest --save
+npm run dev
+```
+
+### ⚙️ Backend Setup
+
+```bash
 cd backend
-npm init -y
-npm install express nodemailer cors body-parser crypto
+npm install bcryptjs@^3.0.2 body-parser@^2.2.0 cors@^2.8.5 crypto@^1.0.1 dotenv@^16.5.0 express@^5.1.0 express-validator@^7.2.1 firebase-admin@^13.3.0 groq-sdk@^0.20.1 jsonwebtoken@^9.0.2 mojoauth-sdk@^1.4.3 mojoauth-web-sdk@^1.17.19 mongodb@^6.16.0 mongoose@^8.14.0 multer@^1.4.5-lts.2 nodemailer@^6.10.1
+node server.js
+```
 
+### 📝 Resume Analyzer Setup
 
+```bash
+cd models
+pip install -r requirements.txt
+python run_app.py
+```
 
+### 🤖 Job Apply Bot Setup
 
-first_name = "Hari"                 # Your first name in quotes Eg: "First", "Sai"
-middle_name = "Senthil"            # Your name in quotes Eg: "Middle", "Vignesh", ""
-last_name = "Kumar"                # Your last name in quotes Eg: "Last", "Golla"
+```bash
+cd JobApplyBot
+python app.py
+```
 
-# Phone number (required), make sure it's valid.
-phone_number = "6383903339"        # Enter your 10 digit number in quotes Eg: "9876543210"
+---
 
-# What is your current city?
-current_city = "Erode"                  # Los Angeles, San Francisco, etc.
-'''
-Note: If left empty as "", the bot will fill in location of jobs location.
-'''
+## 📦 Docker Support
 
-# Address, not so common question but some job applications make it required!
-street = "123 Main Street"
-state = "Tamil Nadu"
-zipcode = "638115"
-country = "India"
+A Dockerfile is included for easy containerization. Use the following command to build and run:
 
-## US Equal Opportunity questions
-# What is your ethnicity or race? If left empty as "", tool will not answer the question. However, note that some companies make it compulsory to be answered
-ethnicity = "Asian"              # "Decline", "Hispanic/Latino", "American Indian or Alaska Native", "Asian", "Black or African American", "Native Hawaiian or Other Pacific Islander", "White", "Other"
+```bash
+docker build -t careerbuildai .
+docker run -p 3000:3000 careerbuildai
+```
 
-# How do you identify yourself? If left empty as "", tool will not answer the question. However, note that some companies make compulsory to be answered
-gender = "Male"                 # "Male", "Female", "Other", "Decline" or ""
+---
 
-# Are you physically disabled or have a history/record of having a disability? If left empty as "", tool will not answer the question. However, note that some companies make it compulsory to be answered
-disability_status = "No"      
+## 📈 Roadmap
 
-veteran_status = "No"  # 
+- [ ] Add support for more platforms like Indeed, Glassdoor
+- [ ] Integrate AI Interview Coach
+- [ ] Implement real-time tracking dashboard
+- [ ] Enable smart filtering for job recommendations
+- [ ] Add multi-language resume optimization
 
-username = "demos9317@gmail.com"       # Enter your username in the quotes
-password = "shari@2024" 
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [contributing guide](CONTRIBUTING.md) before submitting pull requests.
+
+---
+
+## 📜 License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+
+---
+
+## 🎯 Want to Support?
+
+If you find this project helpful, consider giving it a ⭐ or contributing to the development!
+
