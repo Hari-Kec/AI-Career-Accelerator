@@ -8,26 +8,31 @@ import {
   FiMessageCircle,
   FiCpu,
   FiCode,
-  FiDatabase
+  FiDatabase,
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+
 const Parsing = () => {
-  const {authToken, user } = useAuth();
+  const { authToken, user } = useAuth();
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false); // Checkbox confirmation
+  const [showModal, setShowModal] = useState(false); // Modal visibility
 
   const runAiBot = async () => {
-    
+    if (!isConfirmed) {
+      setShowModal(true); // Show alert modal if not confirmed
+      return;
+    }
+
     setStatus('loading');
     setMessage('Initializing AI bot...');
-    
     setProgress(10);
 
-    // Simulate progress updates
     const interval = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         if (prev >= 90) {
           clearInterval(interval);
           return prev;
@@ -37,18 +42,18 @@ const Parsing = () => {
     }, 800);
 
     try {
-      const res = await fetch("https://ff4a-103-218-133-171.ngrok-free.app/run", {
+      const res = await fetch("https://ff4a-103-218-133-171.ngrok-free.app/run ", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('authToken')}`
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({
-          user_id: user.id // ✅ Dynamic user ID
-        })
+          user_id: user.id, // ✅ Dynamic user ID
+        }),
       });
-      if (!res.ok) throw new Error("Failed to trigger bot");
 
+      if (!res.ok) throw new Error("Failed to trigger bot");
 
       clearInterval(interval);
       setProgress(100);
@@ -61,7 +66,7 @@ const Parsing = () => {
         console.log("Output:", data.output);
       } else {
         setStatus('error');
-        setMessage(data.message || "Running AI bot. Hold for some time . Dont refresh page");
+        setMessage(data.message || "Running AI bot. Hold for some time. Don't refresh page");
         console.error("Error:", data.error || data.stderr);
       }
     } catch (err) {
@@ -71,7 +76,12 @@ const Parsing = () => {
       console.error(err);
     }
   };
+
   const handleApplyClick = () => {
+    if (!isConfirmed) {
+      setShowModal(true);
+      return;
+    }
     setShowPopup(true);
     setTimeout(() => setShowPopup(false), 5000); // Hide after 5s
   };
@@ -143,7 +153,7 @@ const Parsing = () => {
         </div>
       </div>
 
-      {/* Tailwind Popup Notification */}
+      {/* Popup Notification */}
       {showPopup && (
         <div className="fixed bottom-6 right-6 bg-white border border-green-300 rounded-xl shadow-2xl p-6 flex items-start gap-4 animate-fade-in-up z-50">
           <FiCheckCircle className="text-3xl text-green-600 mt-1 animate-bounce" />
@@ -152,6 +162,40 @@ const Parsing = () => {
             <p className="text-gray-700">
               You will be notified via email. Updates on job applications will be sent to your inbox.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-8 w-11/12 max-w-md">
+            <div className="flex items-start gap-4">
+              <FiAlertCircle className="text-4xl text-yellow-500 mt-1" />
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Profile Update Required</h3>
+                <p className="text-gray-700 mb-4">
+                  Please ensure you’ve updated your profile section. The job apply bot works best with complete information.
+                </p>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isConfirmed}
+                    onChange={(e) => setIsConfirmed(e.target.checked)}
+                    className="form-checkbox h-5 w-5 text-blue-600"
+                  />
+                  <span className="text-gray-700">I have updated my profile.</span>
+                </label>
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

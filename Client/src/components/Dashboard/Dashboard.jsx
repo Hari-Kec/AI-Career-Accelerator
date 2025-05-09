@@ -4,12 +4,15 @@ import { useAuth } from '../../context/AuthContext';
 import {
   FiHome,
   FiUser,
-  FiSettings
+  FiSettings,
+  FiArrowRight,
+
 } from 'react-icons/fi';
 import {
   FaRegLightbulb,
   FaUserEdit,
   FaBriefcase
+  
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import logo from '../../assets/logo.png';
@@ -94,6 +97,23 @@ const Dashboard = () => {
                   <Icon className="mr-3" />
                   <span>{item}</span>
                 </div>
+                {item === 'Profile' && (
+        <motion.span
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-yellow-300 text-xl"
+          animate={{
+            y: [0, -8, 0],
+            opacity: [0.8, 1, 0.8],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        >
+           <FiArrowRight />
+        </motion.span>
+      )}
+    
               </motion.div>
             );
           })}
